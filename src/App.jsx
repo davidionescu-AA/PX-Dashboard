@@ -236,10 +236,15 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
   });
 
   // Compute hourly patterns from filtered conversations (respects inbox + date filters)
+  // Convert UTC timestamps to US Eastern Time
+  const toET = (utcDate) => {
+    const et = new Date(utcDate.toLocaleString("en-US", { timeZone: "America/New_York" }));
+    return et.getHours();
+  };
   const hourlyCounts = {};
   filteredConvos.forEach(c => {
     if (!c.created_at) return;
-    const hour = new Date(c.created_at).getHours();
+    const hour = toET(new Date(c.created_at));
     if (hour >= 5 && hour <= 21) {
       hourlyCounts[hour] = (hourlyCounts[hour] || 0) + 1;
     }
