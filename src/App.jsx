@@ -798,10 +798,15 @@ function VolumeTab({ data, avgWeeklyVol, volRtData }) {
           <Card>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {data.weekly.filter(w => w.volumeDriver).map((w, i) => (
-                <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "12px 16px", background: C.borderLight, borderRadius: 10 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: C.blue, minWidth: 72, flexShrink: 0 }}>{w.label}</div>
-                  <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.5 }}>
-                    <strong style={{ color: C.text }}>{w.vol} convos</strong> — {w.volumeDriver}
+                <div key={i} style={{ padding: "14px 16px", background: C.borderLight, borderRadius: 10 }}>
+                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: C.blue, minWidth: 72, flexShrink: 0 }}>{w.label}</div>
+                    <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.5 }}>
+                      <strong style={{ color: C.text }}>{w.vol} convos</strong> — {w.volumeDriver}
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 10, marginLeft: 86, fontSize: 12, color: C.textLight, fontStyle: "italic", lineHeight: 1.6, borderLeft: `2px solid ${C.border}`, paddingLeft: 12 }}>
+                    Insight placeholder — key patterns and context for this week will appear here.
                   </div>
                 </div>
               ))}
