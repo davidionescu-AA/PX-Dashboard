@@ -235,7 +235,20 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
     return { label: wl, vol: wd.convos.length, rt: weekRT, m: wd.cats, partial: meta.is_partial_week, volumeDriver: meta.volume_driver };
   });
 
-  const hourly = hourlyPatterns.map(h => ({ h: h.hour_label, inbound: h.inbound_count }));
+  // Compute hourly patterns from filtered conversations (respects inbox + date filters)
+  const hourlyCounts = {};
+  filteredConvos.forEach(c => {
+    if (!c.created_at) return;
+    const hour = new Date(c.created_at).getHours();
+    if (hour >= 5 && hour <= 21) {
+      hourlyCounts[hour] = (hourlyCounts[hour] || 0) + 1;
+    }
+  });
+  const hourLabel = h => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`;
+  const hourly = [];
+  for (let h = 5; h <= 21; h++) {
+    hourly.push({ h: hourLabel(h), inbound: hourlyCounts[h] || 0 });
+  }
 
   const filteredWeekLabelSet = new Set(filteredWeekLabels);
   const filteredInsights = (dateRange.from || dateRange.to)
