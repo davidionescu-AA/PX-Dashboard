@@ -1,0 +1,250 @@
+#1 | FAILED > FAILED [?]
+  From: lindsayhayhurst@gmail.com | Subject: Question
+  Reasoning: 
+  Conversation: [2026-03-12 19:22:20] Lindsay Hayhurst: | Hi Mary! | I have a question regarding the Alpha Anywhere team. I have been thinking/praying about getting back into the workforce. Alpha seems like a dream career option. I taught for many years in the states, mostly primary grades, with a specialization in tea
+---
+#2 | FAILED > FAILED [?]
+  From: ptuchin@gmail.com | Subject: Re: Alpha Anywhere MAP Rewards: 200 Alphas — River Tuchin
+  Reasoning: 
+  Conversation: [2026-03-13 18:02:05] Paul Tuchin: ﻿Also, when will all of their alphas be transferred to the new alpha bank? They are both showing zero. Sent from my iPhone | [2026-03-13 19:19:37] David Ionescu (admin): Hi Paul! | Thank you for letting us know. Our team is working on getting all the Alphas transferred
+---
+#3 | FAILED > FAILED [?]
+  From: jessica.fulgencio@gmail.com | Subject: Mason Fulgencio Science and Writing
+  Reasoning: 
+  Conversation: [2026-03-11 15:21:38] Jessica Fulgencio: Hi, My son, Mason Fulgencio, is having an issue with AlphaWrite and his most recent science lesson. In writing, he is stuck on a screen expecting him to revise a paragraph, but there is no indication as to what to revise. I have attempted to make revisions fo
+---
+#4 | FAILED > FAILED [?]
+  From: moreheadj@gmail.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-02-27 20:22:45] Justin Morehead: My son Addison is trying to take the map tests and they keep giving an error that states: "The system is at capacity, please try again later" can you help with this? | [2026-02-27 20:22:48] Alphie (bot): Thank you for sharing this with us. | [2026-02-27 20:22:49] A
+---
+#5 | FAILED > FAILED [?]
+  From: strader.elizabeth@gmail.com | Subject: Fwd: Classbank in Dash Not Working
+  Reasoning: 
+  Conversation: [2026-03-13 18:26:48] Elizabeth Strader: ---------- Forwarded message --------- From: Hamza Mujahid (2hr Learning) < support@2hr-learning-support.kayako.com > Date: Fri, Mar 13, 2026 at 9:27 AM Subject: Re: Classbank in Dash Not Working To: Elizabeth Strader < strader.elizabeth@gmail.com > You are r
+---
+#6 | FAILED > FAILED [?]
+  From: reshma.gadd@gmail.com | Subject: Jackson Gadd Science Not Updating
+  Reasoning: 
+  Conversation: [2026-03-13 19:14:02] Reshma Gadd: Hello, | Jackson mentioned that his science work is not getting counted in his daily reporting. He mentioned this yesterday, and we waited a day to see if there was a lag, but it’s still an issue. Could you please investigate? | Thank you, | Reshma
+---
+#7 | FAILED > FAILED [?]
+  From: thalia.zamarripa@yahoo.com | Subject: Zoom meeting right now
+  Reasoning: 
+  Conversation: [2026-03-05 20:36:07] Thalia Crisp: Hi Mary - I can't find the link to the invite. Can you please resend? Trying to log in. Thanks, Thalia | [2026-03-05 20:36:17] David Ionescu (admin): 🎓 Breakthrough Coaching Student Reached Out | 👨‍👩‍👧 Parent Name: Thalia Crisp | 📚 Student Name: Gabriel Crisp | 👨‍🏫 Coach 
+---
+#8 | FAILED > FAILED [?]
+  From: svenja.schoonover@gmail.com | Subject: Sophia‘s Reading
+  Reasoning: 
+  Conversation: [2026-03-07 16:22:10] Svenja Schoonover: Hi Rowan, | How are you? | We talked a while back about Sophia‘s reading abilities. | I wanted to check in with you whether we can move her back up to Alpha Read? | She has been having very high accuracy (around 97%) , just a little slower than you would want to see.
+---
+#9 | FAILED > FAILED [?]
+  From: svenja.schoonover@gmail.com | Subject: Re: Sophia‘s Reading
+  Reasoning: 
+  Conversation: [2026-03-12 17:31:53] Svenja Schoonover: ﻿ Hi Mary, How are you? I haven’t heard back yet about Sophia’s reading test. Do you know the results yet? Thank you, Svenja | [2026-03-12 17:50:09] Mary Betz (admin): Hi Svenja, ​Thanks so much for reaching out about this. I spoke with the Head of Academics an
+---
+#10 | FAILED > FAILED [?]
+  From: marka82331@aol.com | Subject: How do we log in to IXL?
+  Reasoning: 
+  Conversation: [2026-03-12 20:51:27] Mark Avery: Do we have credentials? Thanks. Mark Avery (for Joseph) 703 299 0450 | [2026-03-12 20:51:35] David Ionescu (admin): 🎓 Breakthrough Coaching Student Reached Out | 👨‍👩‍👧 Parent Name: Mark Avery | 📚 Student Name: Joseph Avery | 👨‍🏫 Coach Name: | [2026-03-12 20:55:20] Mark Avery 
+---
+#11 | FAILED > FAILED [?]
+  From: noah.lapham@2hourlearning.com | Subject: wrong answers
+  Reasoning: 
+  Conversation: [2026-03-13 18:36:38] Noah Lapham: | whenever I do the right answers ixl says im doing it wrong.Its happened many times and keeps doing it.
+---
+#12 | FAILED > FAILED [?]
+  From: ptuchin@gmail.com | Subject: Fwd: Alpha Anywhere MAP Rewards: 200 Alphas — River Tuchin
+  Reasoning: 
+  Conversation: [2026-02-23 23:19:52] Paul Tuchin: Hi Mary, we’ve received many of these. Do we need to deposit them in some way or are they in River’s “bank”. Also how do you access that? We are having problems with Scarlett’s reading section again. It seems to have disappeared. Can you please check on that? Thank
+---
+#13 | FAILED > FAILED [?]
+  From: pueyom@gmail.com | Subject: MAP Test error message
+  Reasoning: 
+  Conversation: [2026-02-27 20:11:21] María Alejandra Pueyo Zozaya: Hi. My child finished the reading MAP test but it does not show as completed. At that moment a message showed up indicating that something went wrong but nothing to worry because it would be solve by support . My son got a score of 250. Student> Sa
+---
+#14 | FAILED > FAILED [?]
+  From: makinirmartin@gmail.com | Subject: Zearn Assistance
+  Reasoning: 
+  Conversation: [2026-03-13 16:17:31] Makini Martin: Good morning, I am having difficulty logging in to Zearn. I clicked the sign in with Google option and was prompted to select parent or student. When I select student, I see a screen that says “Ask a grown-up to create your account.” When I clicked I’m an adult, 
+---
+#15 | FAILED > FAILED [?]
+  From: kirstenklyurich@gmail.com | Subject: FW: Learning Time Update - Audrey
+  Reasoning: 
+  Conversation: [2026-03-11 16:09:19] Kirsten Yurich: HI There. I love the update and would like to understand a bit more about how the dashboard works as we have been using that to track progress. The grids turn green, and I can’t figure out what that’s based upon - because based on the message below, it’s not bas
+---
+#16 | FAILED > FAILED [?]
+  From: leo.laban@2hourlearning.com | Subject: Failed to send
+  Reasoning: 
+  Conversation: [2026-03-13 16:05:46] Leo Laban: | Hi, When I complete the Gather and Sort lesson, it shows this: | What can I do? | Leo | [2026-03-13 17:38:22] David Ionescu (admin): Hello Leo! | No problem at all! That Gather and Sort lesson you completed is in Zearn, which is a supplementary lesson. It's good for helping 
+---
+#17 | FAILED > FAILED [?]
+  From: teresa.psiedu@gmail.com | Subject: Re: The Gap Between Grades and Learning
+  Reasoning: 
+  Conversation: [2026-03-13 00:26:38] Teresa De Vasconcelos: Sounds great! Will be looking forward to that! A quarta, 4/03/2026, 13:49, Joe Marone < joem@2hourlearning.com > escreveu: Hi Teresa, Thank you for writing in and asking about high school. Alpha Anywhere currently serves students in grades K–8, and we do 
+---
+#18 | FAILED > FAILED [?]
+  From: restrepo.eric1@gmail.com | Subject: Re: Jeremy is halfway there
+  Reasoning: 
+  Conversation: [2026-03-13 01:35:50] Eric Restrepo: Hey there, We are trying to have my son complete the assessment and when he goes into the different modules it says that his birth year is 2016. This is not correct, should we proceed anyway? I have checked the portal and I did put his birthdate in correctly. He 
+---
+#19 | FAILED > FAILED [?]
+  From: krys.davis@2hourlearning.com | Subject: Re: Alpha Anywhere
+  Reasoning: 
+  Conversation: [2026-03-13 16:22:37] Krystal Davis: | Hi Cheryl, | Thank you for letting me know. I completely understand, and we’d be glad to welcome your family back anytime in the future. | Yes, Cash will absolutely be able to finish out the remainder of the month you’ve already paid for. | I’m also copying our Parent 
+---
+#20 | FAILED > FAILED [?]
+  From: patsulli77@gmail.com | Subject: Re: Welcome to Alpha Anywhere! Let's get started 🎉
+  Reasoning: 
+  Conversation: [2026-03-13 00:19:24] PATRICK SULLIVAN: Hello. How much is tuition for Alpha Anywhere? Is there someone I can talk with? Thank you, Patrick | [2026-03-13 12:46:17] David Ionescu (admin): Hi Patrick! | Thank you so much for your message. Here's how our pricing works: | Right now, the monthly rate is $833.3
+---
+#21 | FAILED > FAILED [?]
+  From: kim.talarico26@gmail.com | Subject: Alpha's
+  Reasoning: 
+  Conversation: [2026-03-13 17:43:20] Kim Talarico: Hi Mary, I'm checking in about the new Alpha Bank. We can see the recent activity of imported Alpha's from March 3 and 10 but I don't see them deposited so that Hank can redeem them. Am I missing something or is the system still migrating? Hank has been very motiv
+---
+#22 | FAILED > FAILED [?]
+  From: mshiota@gmail.com | Subject: Bracketing test not updating
+  Reasoning: 
+  Conversation: [2026-03-12 03:26:27] Maiko Shiota: Hello Support Team, My son Sho did his kindergarten bracketing test in Math last night and got 100%. This morning when we logged in, the test is still showing up as the kindergarten test and not updated to a 1st grade test as it is supposed to. Please help. Sincer
+---
+#23 | FAILED > FAILED [?]
+  From: muscari.joe@gmail.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-03-13 02:20:51] Joseph Muscari: Hi - We set up a Classbank account for Mia, but Alpha Anywhere won't let us continue to Step 8 (Live PArent Tech session) as it says we don't have ClassBank setup complete. Can you please adise what needs to be done to go to Step 7? Thank you | [2026-03-13 02:20:5
+---
+#24 | FAILED > FAILED [?]
+  From: venfranc@gmail.com | Subject: Re: Quick question about today's Alpha meeting?
+  Reasoning: 
+  Conversation: [2026-03-10 21:10:32] Venu Kannan: Hi both. Is this resolved? As Maya can’t wait to start. | [2026-03-10 21:13:38] David Ionescu (admin): Hi Venu, | Thank you for following up, and we completely understand Maya's eagerness to get started! Unfortunately, this isn't resolved just yet. Our tech team is sti
+---
+#25 | FAILED > FAILED [?]
+  From: rsmith23@gmail.com | Subject: MAP modules
+  Reasoning: 
+  Conversation: [2026-03-03 06:46:14] ryan smith: Hi, My daughter has been working through the MAP modules, shes completed 3 of 4 sofar but it seems like there has been some issue with the system recognizing that she completed them. At the time it mentioned something about how it has been recorded and will be revie
+---
+#26 | FAILED > FAILED [?]
+  From: hopedulac@gmail.com | Subject: Language Arts Test
+  Reasoning: 
+  Conversation: [2026-03-13 06:23:53] Hope Dulac: Hello Team - Riley completed his language arts knowledge gaps today. Just wanted to give you a heads up as I know last time there was an issue with the test automatically being issued when he completed the lessons.. Hopefully it is available on his dash in the morni
+---
+#27 | FAILED > FAILED [?]
+  From: iowaflyer2@gmail.com | Subject: procedures to pause academics for summer break
+  Reasoning: 
+  Conversation: [2026-03-08 21:11:08] Alicia Meyer: Hello! During onboarding, I remember talking about the ability to pause Alpha Anywhere to take a summer break, and I would like to clarify all the details. Could you please send me information about the procedures and guidelines for pausing our academic sessions t
+---
+#28 | FAILED > FAILED [?]
+  From: sah0828@gmail.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-03-13 04:10:41] Susie Kwiatkowski: I do not see pricing listed. Pricing for kindergarten please | [2026-03-13 04:10:44] Alphie (bot): Thank you for sharing this with us. | [2026-03-13 04:10:44] Alphie (bot): We’ve received your message and have connected you to our Parent Experience team. | [2026-03
+---
+#29 | FAILED > FAILED [?]
+  From: moreheadj@gmail.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-03-12 15:44:49] Justin Morehead: My son started his bracketing testing on Tuesday this week. He took the first tests in each of the subjects. Now nothing has progressed forward for him and he doesn't know what to do. If he selects the bracketing tests it tells him that he already took them. He
+---
+#30 | FAILED > FAILED [?]
+  From: sadie.young@2hourlearning.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-03-13 15:36:45] Sadie Young: I really do thank you for sending me this email and I totally understand | From your new alpha anywhere student | Sadie Young! | [2026-03-13 16:22:50] Mary Betz (admin): Hi Sadie, ​Thanks for your email. I hope you have a wonderful weekend! Mary
+---
+#31 | FAILED > FAILED [?]
+  From: hailiebrook@yahoo.com | Subject: Test login fails
+  Reasoning: 
+  Conversation: [2026-03-13 16:37:36] Hailie Scott: Hello, I am trying to have my son log into the tests for the initial assessments (I am using the BRAVE browser on my laptop). Each time I try to log in I get the same result: <img title="Inline image" alt="Inline image" src="cid: 4f8ab208-85f1-cf08-3730-8fe8b0025c
+---
+#32 | FAILED > FAILED [?]
+  From: jdjohns1983@gmail.com | Subject: Solveig and Ingrid Johnson
+  Reasoning: 
+  Conversation: [2026-03-06 20:29:30] Jeremy Johnson: Hi Mary, | Jessica and I have reviewed/edited the Google doc you compiled. | Please forward to the appropriate team/individuals. | We look forward you your updates/response. | - Jeremy and Jessica Johnson | [2026-03-06 20:29:30] Jeremy Johnson (user): Hi Mary, | Jessica and
+---
+#33 | FAILED > FAILED [?]
+  From: hopedulac@gmail.com | Subject: Dashboard Issues Update
+  Reasoning: 
+  Conversation: [2026-03-05 18:13:06] Hope Dulac: Hello Team - Just a quick update on the continued issues we are seeing on the Dashboard Language Arts - Riley took his academic test yesterday and scored a 65%. We were expecting to see knowledge gaps but are seeing 9th grade skills instead Science - the issue with 
+---
+#34 | FAILED > FAILED [?]
+  From: mosquera.mariana@gmail.com | Subject: Re: A small favor (that will make a big difference) 🙏
+  Reasoning: 
+  Conversation: [2026-03-13 15:51:28] Mariana Meyers: Hi team, It took us a while, but we just submitted a testimonial. No need for any cool rewards. We just wanted to genuinely share how we feel. Thank you for all you do! Mariana and Marco Sent from my iPhone
+---
+#35 | FAILED > FAILED [?]
+  From: 456junkyjunk@gmail.com | Subject: Hoping you get this
+  Reasoning: 
+  Conversation: [2026-03-12 23:19:59] Susan Slaughter: I sent a message on circle but not sure you got it. That was back in January. We have been working on some tutoring in math since and wanted to touch base. | [2026-03-13 15:20:44] Mary Betz (admin): Hi Susan, ​Thank you for emailing me, I did not see the message 
+---
+#36 | FAILED > FAILED [?]
+  From: simon.pikkat@me.com | Subject: Re: The Gap Between Grades and Learning
+  Reasoning: 
+  Conversation: [2026-03-12 06:41:00] Simon Pikkat: Thanks Joe, Setting up an American mailing address isn’t a problem so long as it can be a PO Box. Would that be okay? Do you offer anything that could be supplementary to their current Schooling? Ideally something they could do in the afternoon / evening. if/when 
+---
+#37 | FAILED > FAILED [?]
+  From: family@dosoaks.com | Subject: MAP Testing
+  Reasoning: 
+  Conversation: [2026-03-08 20:55:51] Paul Bell: I have been trying to start the testing for two of my children but the text credential generation consistently fails. Please call to help through resolution. Best, Paul Bell 859.801.4388 | [2026-03-08 21:27:12] Paul Bell (user): We've been trying for about 45 minutes t
+---
+#38 | FAILED > FAILED [?]
+  From: jeffbezner@gmail.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-03-12 17:27:27] Jeff Bezner: Hello, I was unable to attend the kickoff session | [2026-03-12 17:27:31] Alphie (bot): Thank you for sharing this with us. | [2026-03-12 17:27:32] Alphie (bot): You’re connected to our Parent Experience team. A team member will follow up shortly. | [2026-03-12 17:27:32]
+---
+#39 | FAILED > FAILED [?]
+  From: molly.baker14@hotmail.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-03-12 00:00:00] Molly Orwell: Hello, we are unsure on where to locate the classcode in the classbank set up | [2026-03-12 00:00:04] Alphie (bot): Thank you for sharing this with us. | [2026-03-12 00:00:04] Alphie (bot): We’ve received your message and have connected you to our Parent Experience te
+---
+#40 | FAILED > FAILED [?]
+  From: glendaliz888@gmail.com | Subject: Reading Map Test
+  Reasoning: 
+  Conversation: [2026-02-04 13:23:59] Glendaliz Rodriguez: Good Morning, I wanted to know if hikdren that weren’t able to take th test yesterday for reading are able to do so today? Also, will we be receiving the Map test Report after each session or at the end of the week? Thank you for your help. Glendaliz Rodrig
+---
+#41 | FAILED > FAILED [?]
+  From: lredepenning@gmail.com | Subject: Work Samples
+  Reasoning: 
+  Conversation: [2026-03-07 02:17:57] Lisa Shapira: Hello, I need to show our charter school teacher work samples for Ella every month. Is there a way to pull any work Samples or completed tests from the system? Thank you so much! Lisa "To what greater object, to what greater character, can we aspire as lawyers tha
+---
+#42 | FAILED > FAILED [?]
+  From: robbins6411@gmail.com | Subject: 
+  Reasoning: 
+  Conversation: [2026-03-13 05:53:03] Nicole Robbins: I'm wanting to set up another student. How can I add a second child to the "my learner" section of my profile? | [2026-03-13 05:53:06] Alphie (bot): Thank you for sharing this with us. | [2026-03-13 05:53:06] Alphie (bot): We’ve received your message and have connec
+---
+#43 | FAILED > FAILED [?]
+  From: alice.margolin@2hourlearning.com | Subject: Unsure of next steps
+  Reasoning: 
+  Conversation: [2026-03-13 00:12:42] Alice Margolin: Hello! I have done tests in all subjects but I am unsure of how to proceed. Do I do a lesson or more tests, and where can I find their access points? Could you please walk me through how to determine what to do next? Thank you very much! -Alice Margolin | [2026-03
+---
+#44 | FAILED > FAILED [?]
+  From: mahajan.nita@gmail.com | Subject: Fwd: Alysha Shadow Day Followup
+  Reasoning: 
+  Conversation: [2026-03-12 05:11:11] Nita Mahajan: Alysha Annamalai’s results. Our goal is to use this platform to prepare her for Alpha high school entrance qualifications. She seems to be in 97 the percentile for math but 52 percentile for reading. Please let me know next steps! Thanks! Sent from my iPhone Begin
+---
+#45 | FAILED > FAILED [?]
+  From: mceisenhart@gmail.com | Subject: Re: Designed for Compounding Growth.
+  Reasoning: 
+  Conversation: [2026-03-11 23:27:22] Meredith Hanley: Hello! I'm trying to access the parent portal to do the assessment test with my son, but it says my token is expired. Are you able to help? Thanks! Meredith | [2026-03-12 18:43:02] David Ionescu (admin): Hi there, Meredith! | Is there any way you could send me a sc
+---
+#46 | FAILED > FAILED [?]
+  From: kspolte@gmail.com | Subject: Bowen science issue
+  Reasoning: 
+  Conversation: [2026-02-18 17:59:53] Kayla O'Connor: We have had a lot of issues with Science over the last few months. | Bowen finished quiz 1 on Friday (2/13) and its not letting him progress. I have mentioned this before; I feel like I need to monitor his daily work closely because of these issues. I noticed this
+---
+#47 | FAILED > FAILED [?]
+  From: dmartinfisher@gmail.com | Subject: request for a meeting
+  Reasoning: 
+  Conversation: [2026-03-12 17:08:20] Donetta Fisher: Hi there. I was wondering if you would have a little time later today to have a meeting with Stella and I. I would like for someone else to explain some things to her so that it is not coming from "mom" haha. It wouldn't need to be a long meeting. I think it wou
+---
+#48 | FAILED > FAILED [?]
+  From: blair6584@gmail.com | Subject: Re: When Learning Is Too Easy for One Child and Too Hard for
+  Reasoning: 
+  Conversation: [2026-03-09 15:26:56] Christie Blair: Hello Joe, I hope you are doing well. I tried to access the parent portal to see what that referred to, but each time it wouldn't allow me to set a password and move forward. My husband and I are interested in the Alpha Anywhere for our oldest son who currently 
+---
+#49 | FAILED > FAILED [?]
+  From: anajsanchez2@yahoo.com | Subject: Re: Let's find out where your child really shines
+  Reasoning: 
+  Conversation: [2026-03-10 00:01:38] Ana Sanchez: Hi Joe, My son tried taking the assessment but when it tries to get his test credentials we get an error. Is there someone that can help us over the phone? Ana | [2026-03-10 21:07:02] Mary Betz (admin): Hi Ana, ​Nico appears to have the correct term in place. Is the 
+---
+#50 | FAILED > FAILED [?]
+  From: hallyg@mac.com | Subject: Re: The Most Common Questions Parents Ask Us
+  Reasoning: 
+  Conversation: [2026-03-09 18:09:03] Hally Grounds: It keeps saying my token is expired. Hally | [2026-03-12 20:20:23] Mary Betz (admin): Hi Hally, ​I just wanted to check back with you to see if you were able to get in to continue working on the learner profile. I don't see any children added to your account at thi
+---

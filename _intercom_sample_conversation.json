@@ -1,0 +1,195 @@
+{
+  "type": "conversation",
+  "id": "215473470873697",
+  "created_at": 1773419208,
+  "updated_at": 1773420996,
+  "waiting_since": null,
+  "snoozed_until": null,
+  "source": {
+    "type": "email",
+    "id": "3521925569",
+    "delivered_as": "customer_initiated",
+    "subject": "<p>Fwd: Classbank in Dash Not Working</p>",
+    "body": "<div><br></div><div><br><div><div dir=\"ltr\">---------- Forwarded message ---------<br>From: <strong dir=\"auto\">Hamza Mujahid (2hr Learning)</strong> <span dir=\"auto\">&lt;<a href=\"mailto:support@2hr-learning-support.kayako.com\" target=\"_blank\" rel=\"nofollow\">support@2hr-learning-support.kayako.com</a>&gt;</span><br>Date: Fri, Mar 13, 2026 at 9:27 AM<br>Subject: Re: Classbank in Dash Not Working<br>To: Elizabeth Strader &lt;<a href=\"mailto:strader.elizabeth@gmail.com\" target=\"_blank\" rel=\"nofollow\">strader.elizabeth@gmail.com</a>&gt;<br></div><br><br><div style=\"font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:25px;margin:0;padding:0;color:#2d3138\"> <div style=\"width:100%\"> <div> <strong>You are receiving this email because request <a href=\"https://support.2hourlearning.com/conversation/view/60325430\" style=\"color:#33afcf\" target=\"_blank\" rel=\"nofollow\">[#60325430]</a> has received the below update:</strong> </div> <div> <div> <div style=\"font-size:14px;line-height:1.6\"> <div>Dear Elizabeth,</div> <div><br></div> <div>Thanks for reaching out! For <strong>any questions or issues related to ClassBank</strong>, such as <strong>payments, purchases, access, balances, or transfers</strong>, these requests are handled directly by our <strong>Parent Experience Team.</strong> </div> <div><br></div> <div>Please contact them at <strong><a href=\"mailto:virtualsupport@2hourlearning.com\" style=\"color:#33afcf\" target=\"_blank\" rel=\"nofollow\">virtualsupport@2hourlearning.com</a></strong>, and they will be happy to assist you further with this.</div> <div><br></div> <div>Let us know if there is anything else we can help with!</div> <div><br></div> <div>Best regards,</div> <div>Hamza Mujahid</div> <div>2hr Learning Support Team</div> <div><br></div> <div>This ticket (<a href=\"https://support.2hourlearning.com/conversation/view/60325430\" style=\"color:#33afcf\" target=\"_blank\" rel=\"nofollow\">#60325430</a>) will stay open for one week unless you reply with \"<strong>This ticket can be closed</strong>\" or update the status to Completed in the portal. We will write to you again to remind you.</div> </div> </div> </div> <div> <br><div style=\"width:100%;margin:0 auto;font-family:Helvetica,sans-serif;font-size:14px;line-height:1.6\"> <blockquote style=\"border-left:3px solid #ddd;font-style:normal;padding-left:1em;margin:0\"> On Fri, Mar 13, 2026 at 8:04 PM, Elizabeth Strader &lt;<a href=\"mailto:strader.elizabeth@gmail.com\" target=\"_blank\" rel=\"nofollow\">strader.elizabeth@gmail.com</a>&gt; wrote via Helpcenter: <div style=\"padding-top:1.5em;color:#5f6c73\"> <div> Hi Alpha<br><br> My daughter noted the new classbank inside of Dash. It shows that alphas are being transferred in as \"bonuses\" but her balance is zero she doesn't have any alphas or ability to transfer alphas. </div> </div> </blockquote> </div> </div> </div> <div style=\"width:100%;font-size:13px;color:#838d94;border-top:2px solid #ddd;padding-top:10px;margin-top:10px;text-align:right\"> Sent with <b><a href=\"https://kayako.com\" style=\"color:#33afcf\" target=\"_blank\" rel=\"nofollow\">Kayako</a></b> </div> </div></div></div>",
+    "author": {
+      "type": "user",
+      "id": "696e7d3610d3c6bf25361084",
+      "name": "Elizabeth Strader",
+      "email": "strader.elizabeth@gmail.com"
+    },
+    "attachments": [],
+    "url": null,
+    "redacted": false
+  },
+  "contacts": {
+    "type": "contact.list",
+    "contacts": [
+      {
+        "type": "contact",
+        "id": "696e7d3610d3c6bf25361084",
+        "external_id": "strader.elizabeth@gmail.com"
+      }
+    ]
+  },
+  "first_contact_reply": {
+    "created_at": 1773419208,
+    "type": "email",
+    "url": null
+  },
+  "admin_assignee_id": 8820320,
+  "team_assignee_id": 8854449,
+  "open": true,
+  "state": "open",
+  "read": true,
+  "tags": {
+    "type": "tag.list",
+    "tags": []
+  },
+  "priority": "not_priority",
+  "sla_applied": null,
+  "statistics": {
+    "type": "conversation_statistics",
+    "time_to_assignment": 0,
+    "time_to_admin_reply": 1788,
+    "time_to_first_close": null,
+    "time_to_last_close": null,
+    "median_time_to_reply": 1788,
+    "first_contact_reply_at": 1773419208,
+    "first_assignment_at": 1773419208,
+    "first_admin_reply_at": 1773420996,
+    "first_close_at": null,
+    "last_assignment_at": 1773419213,
+    "last_assignment_admin_reply_at": 1773420996,
+    "last_contact_reply_at": 1773419208,
+    "last_admin_reply_at": 1773420996,
+    "last_close_at": null,
+    "last_closed_by_id": null,
+    "count_reopens": 0,
+    "count_assignments": 2,
+    "count_conversation_parts": 5
+  },
+  "conversation_rating": null,
+  "teammates": {
+    "type": "admin.list",
+    "admins": [
+      {
+        "type": "admin",
+        "id": "8820320"
+      }
+    ]
+  },
+  "title": "Fwd: Classbank in Dash Not Working",
+  "custom_attributes": {
+    "Has attachments": false,
+    "Imported via standalone": false,
+    "Auto-translated": false,
+    "Fin AI Agent: Preview": false,
+    "Fin AI Agent: Image used in reply": false,
+    "Copilot used": false,
+    "Has QA Notes": false,
+    "QA Notes Count": 0,
+    "Language": "English"
+  },
+  "topics": {
+    "type": "topic.list",
+    "topics": [],
+    "total_count": 0
+  },
+  "ticket": null,
+  "linked_objects": {
+    "type": "list",
+    "data": [],
+    "total_count": 0,
+    "has_more": false
+  },
+  "ai_agent": null,
+  "ai_agent_participated": false,
+  "conversation_parts": {
+    "type": "conversation_part.list",
+    "conversation_parts": [
+      {
+        "type": "conversation_part",
+        "id": "41266777760",
+        "part_type": "default_assignment",
+        "body": null,
+        "created_at": 1773419208,
+        "updated_at": 1773419208,
+        "notified_at": 1773419208,
+        "assigned_to": {
+          "type": "bot",
+          "id": "8819365"
+        },
+        "author": {
+          "id": "8819365",
+          "type": "bot",
+          "name": "Alphie",
+          "email": "operator+q0v8g9ws@intercom.io"
+        },
+        "attachments": [],
+        "external_id": null,
+        "redacted": false
+      },
+      {
+        "type": "conversation_part",
+        "id": "41266778362",
+        "part_type": "conversation_attribute_updated_by_admin",
+        "body": null,
+        "created_at": 1773419208,
+        "updated_at": 1773419209,
+        "notified_at": 1773419208,
+        "assigned_to": null,
+        "author": {
+          "id": "8819365",
+          "type": "bot",
+          "name": "Alphie",
+          "email": "operator+q0v8g9ws@intercom.io"
+        },
+        "attachments": [],
+        "external_id": null,
+        "redacted": false
+      },
+      {
+        "type": "conversation_part",
+        "id": "41266784042",
+        "part_type": "assignment",
+        "body": null,
+        "created_at": 1773419213,
+        "updated_at": 1773419213,
+        "notified_at": 1773419213,
+        "assigned_to": {
+          "type": "admin",
+          "id": "8820320"
+        },
+        "author": {
+          "id": "8819365",
+          "type": "bot",
+          "name": "Alphie",
+          "email": "operator+q0v8g9ws@intercom.io"
+        },
+        "attachments": [],
+        "external_id": null,
+        "redacted": false
+      },
+      {
+        "type": "conversation_part",
+        "id": "41269147002",
+        "part_type": "comment",
+        "body": "<p class=\"no-margin\">Hi Elizabeth,<br>\u200bWe are in the process of migrating all of our students' accounts from Classbank to Alpha Bank. Rest assured that we have kept close records of all earnings and transactions and all of Lilly's alphas will be accounted for :-)<br>This should be completed by the end of the day today and more information will follow.</p>\n<p class=\"no-margin\">Thank you,</p>\n<p class=\"no-margin\">Mary</p>",
+        "created_at": 1773420996,
+        "updated_at": 1773420996,
+        "notified_at": 1773420996,
+        "assigned_to": null,
+        "author": {
+          "id": "8820320",
+          "type": "admin",
+          "name": "Mary Betz",
+          "email": "mary.betz@2hourlearning.com"
+        },
+        "attachments": [],
+        "external_id": null,
+        "redacted": false
+      }
+    ],
+    "total_count": 4
+  }
+}
