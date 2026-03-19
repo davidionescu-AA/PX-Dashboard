@@ -73,13 +73,17 @@ function useSupabase() {
 
   useEffect(() => {
     async function load() {
-      const [ws, cat, ins, hp, conv] = await Promise.all([
+      const [ws, cat, ins, hp] = await Promise.all([
         supabase.from("weekly_stats").select("*").order("week_label"),
         supabase.from("categorizations").select("*"),
         supabase.from("weekly_insights").select("*").eq("status", "published"),
         supabase.from("hourly_patterns").select("*").order("hour_num"),
-        supabase.from("conversations").select("id,created_at,user_name,assigned_agent,state,subject,week_label,message_count,source_channel"),
       ]);
+      // Fetch conversations — try with first_response_min, fall back without it
+      let conv = await supabase.from("conversations").select("id,created_at,user_name,assigned_agent,state,subject,week_label,message_count,source_channel,first_response_min");
+      if (conv.error) {
+        conv = await supabase.from("conversations").select("id,created_at,user_name,assigned_agent,state,subject,week_label,message_count,source_channel");
+      }
       setWeeklyStats(ws.data || []);
       setCategorizations(cat.data || []);
       setInsights(ins.data || []);
@@ -141,71 +145,62 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
   });
   const weekCount = filteredWeekLabels.length;
 
+  // Helper: percentile from sorted array
+  const percentile = (sorted, p) => {
+    if (!sorted.length) return null;
+    if (sorted.length === 1) return sorted[0];
+    const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p));
+    return sorted[idx];
+  };
+  const avg = arr => arr && arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length * 10) / 10 : null;
+  const med = arr => {
+    if (!arr || !arr.length) return null;
+    const s = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+  };
+
+  // Build agent stats from filtered conversations (respects date + inbox filters)
   const agentMap = {};
   filteredConvos.forEach(c => {
     const agent = c.assigned_agent;
     if (!agent || !TEAM_NAMES.has(agent)) return;
-    if (!agentMap[agent]) agentMap[agent] = { conversations: 0, messages: 0 };
+    if (!agentMap[agent]) agentMap[agent] = { conversations: 0, messages: 0, rts: [] };
     agentMap[agent].conversations += 1;
     agentMap[agent].messages += (c.message_count || 1);
+    if (c.first_response_min != null) {
+      agentMap[agent].rts.push(c.first_response_min);
+    }
   });
-
-  filteredWeekLabels.forEach(wl => {
-    const w = weekMeta[wl];
-    if (!w) return;
-    const agents = typeof w.agent_stats === "string" ? JSON.parse(w.agent_stats) : (w.agent_stats || []);
-    agents.forEach(a => {
-      if (!TEAM_NAMES.has(a.name)) return;
-      if (!agentMap[a.name]) agentMap[a.name] = { conversations: 0, messages: 0 };
-      if (a.median_response_min != null) {
-        if (!agentMap[a.name].responseTimes) agentMap[a.name].responseTimes = [];
-        agentMap[a.name].responseTimes.push(a.median_response_min);
-      }
-      // Store percentile data
-      if (a.p25 != null) {
-        if (!agentMap[a.name].p25s) agentMap[a.name].p25s = [];
-        agentMap[a.name].p25s.push(a.p25);
-      }
-      if (a.p75 != null) {
-        if (!agentMap[a.name].p75s) agentMap[a.name].p75s = [];
-        agentMap[a.name].p75s.push(a.p75);
-      }
-      if (a.p90 != null) {
-        if (!agentMap[a.name].p90s) agentMap[a.name].p90s = [];
-        agentMap[a.name].p90s.push(a.p90);
-      }
-      if (a.mean_response_min != null) {
-        if (!agentMap[a.name].meanRTs) agentMap[a.name].meanRTs = [];
-        agentMap[a.name].meanRTs.push(a.mean_response_min);
-      }
-    });
-  });
-
-  const avg = arr => arr && arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length * 10) / 10 : null;
 
   const agentList = Object.entries(agentMap)
-    .map(([name, d]) => ({
-      name,
-      conversations: d.conversations,
-      messages: d.messages,
-      medianRT: avg(d.responseTimes),
-      meanRT: avg(d.meanRTs),
-      p25: avg(d.p25s),
-      p75: avg(d.p75s),
-      p90: avg(d.p90s),
-      ...AGENT_DISPLAY[name],
-    }))
+    .map(([name, d]) => {
+      const sorted = [...d.rts].sort((a, b) => a - b);
+      return {
+        name,
+        conversations: d.conversations,
+        messages: d.messages,
+        medianRT: med(sorted),
+        meanRT: avg(sorted),
+        p25: sorted.length > 0 ? Math.round(percentile(sorted, 0.25) * 10) / 10 : null,
+        p75: sorted.length > 0 ? Math.round(percentile(sorted, 0.75) * 10) / 10 : null,
+        p90: sorted.length > 0 ? Math.round(percentile(sorted, 0.90) * 10) / 10 : null,
+        responseCount: sorted.length,
+        ...AGENT_DISPLAY[name],
+      };
+    })
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 
   const realAgentConvos = agentList.reduce((s, a) => s + a.conversations, 0);
-  const allRTs = agentList.filter(a => a.medianRT != null).map(a => a.medianRT);
-  const teamMedianRT = allRTs.length > 0 ? Math.round(allRTs.reduce((a, b) => a + b, 0) / allRTs.length) : null;
-  const allMeans = agentList.filter(a => a.meanRT != null).map(a => a.meanRT);
-  const teamMeanRT = allMeans.length > 0 ? Math.round(allMeans.reduce((a, b) => a + b, 0) / allMeans.length * 10) / 10 : null;
-  const allP90s = agentList.filter(a => a.p90 != null).map(a => a.p90);
-  const teamP90 = allP90s.length > 0 ? Math.round(allP90s.reduce((a, b) => a + b, 0) / allP90s.length * 10) / 10 : null;
-  const allP25s = agentList.filter(a => a.p25 != null).map(a => a.p25);
-  const teamP25 = allP25s.length > 0 ? Math.round(allP25s.reduce((a, b) => a + b, 0) / allP25s.length * 10) / 10 : null;
+  // Team-wide stats from all filtered RTs (not averaging per-agent, but from raw values)
+  const allFilteredRTs = filteredConvos
+    .filter(c => c.first_response_min != null && TEAM_NAMES.has(c.assigned_agent))
+    .map(c => c.first_response_min)
+    .sort((a, b) => a - b);
+  const teamMedianRT = med(allFilteredRTs) != null ? Math.round(med(allFilteredRTs) * 10) / 10 : null;
+  const teamMeanRT = avg(allFilteredRTs);
+  const teamP90 = allFilteredRTs.length > 0 ? Math.round(percentile(allFilteredRTs, 0.90) * 10) / 10 : null;
+  const teamP25 = allFilteredRTs.length > 0 ? Math.round(percentile(allFilteredRTs, 0.25) * 10) / 10 : null;
 
   const macroMap = {};
   const subMap = {};
@@ -229,9 +224,11 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
   const weekly = filteredWeekLabels.map(wl => {
     const wd = weekMap[wl];
     const meta = weekMeta[wl] || {};
-    const agents = typeof meta.agent_stats === "string" ? JSON.parse(meta.agent_stats) : (meta.agent_stats || []);
-    const rts = agents.filter(a => a.median_response_min != null && TEAM_NAMES.has(a.name)).map(a => a.median_response_min);
-    const weekRT = rts.length > 0 ? Math.round(rts.reduce((a, b) => a + b, 0) / rts.length) : null;
+    // Compute RT from filtered conversations (respects inbox + date filters)
+    const weekRTs = wd.convos
+      .filter(c => c.first_response_min != null && TEAM_NAMES.has(c.assigned_agent))
+      .map(c => c.first_response_min);
+    const weekRT = weekRTs.length > 0 ? Math.round(weekRTs.reduce((a, b) => a + b, 0) / weekRTs.length) : null;
     return { label: wl, vol: wd.convos.length, rt: weekRT, m: wd.cats, partial: meta.is_partial_week, volumeDriver: meta.volume_driver };
   });
 
@@ -792,23 +789,13 @@ function VolumeTab({ data, avgWeeklyVol, volRtData }) {
         </>
       )}
 
-      {data.weekly.some(w => w.volumeDriver) && (
+      {WEEKLY_DRIVERS.length > 0 && (
         <>
           <Sec sub="What drove conversation volume each week">Weekly Volume Drivers</Sec>
           <Card>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {data.weekly.filter(w => w.volumeDriver).map((w, i) => (
-                <div key={i} style={{ padding: "14px 16px", background: C.borderLight, borderRadius: 10 }}>
-                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: C.blue, minWidth: 72, flexShrink: 0 }}>{w.label}</div>
-                    <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.5 }}>
-                      <strong style={{ color: C.text }}>{w.vol} convos</strong> — {w.volumeDriver}
-                    </div>
-                  </div>
-                  <div style={{ marginTop: 10, marginLeft: 86, fontSize: 12, color: C.textLight, fontStyle: "italic", lineHeight: 1.6, borderLeft: `2px solid ${C.border}`, paddingLeft: 12 }}>
-                    Insight placeholder — key patterns and context for this week will appear here.
-                  </div>
-                </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {WEEKLY_DRIVERS.map((d, i) => (
+                <WeeklyDriverRow key={i} driver={d} />
               ))}
             </div>
           </Card>
@@ -836,6 +823,121 @@ function VolumeTab({ data, avgWeeklyVol, volRtData }) {
 }
 
 // ═══ TEAM TAB ═══
+
+const WEEKLY_DRIVERS = [
+  {
+    week: "Feb 16", convos: 157, cancellations: 2,
+    oneLiner: "New cohort launch + MAP Growth results arriving",
+    highlights: [
+      { label: "Login issues", value: "55 convos", note: "highest of any week" },
+      { label: "Onboarding", value: "13 convos" },
+      { label: "Bracketing", value: "28 mentions", note: "new families testing" },
+      { label: "MAP Growth", value: "17 convos", note: "existing customers checking scores" },
+      { label: "MAP Screener", value: "17 convos", note: "13 from enrolling families — not yet crisis" },
+      { label: "Apps & Software", value: "22 convos", note: "IXL (18), StudyReel (21), Lalilo" },
+    ],
+    summary: "A typical \"getting started\" week with predictable new-cohort volume.",
+  },
+  {
+    week: "Feb 23", convos: 151, cancellations: 2,
+    oneLiner: "Quiet week, but platform friction building underneath",
+    highlights: [
+      { label: "MAP Screener", value: "19 convos", note: "up from 17 — 15 from enrolling families" },
+      { label: "Platform & Technical", value: "20 convos", note: "up from 12 prior week" },
+      { label: "Dash & Portal", value: "10 convos" },
+      { label: "Outages & Downtime", value: "5 convos", note: "emerging" },
+      { label: "StudyReel", value: "24 mentions", note: "still high" },
+    ],
+    summary: "The screener and platform problems that would explode in Mar 2 were already accumulating here.",
+  },
+  {
+    week: "Mar 2", convos: 194, cancellations: 7,
+    oneLiner: "Funnel opened + MAP Screener technical crisis — peak volume",
+    highlights: [
+      { label: "Prospect volume", value: "+41%", note: "61 → 86 prospects" },
+      { label: "MAP Screener", value: "33 convos", note: "26 from enrolling families — 30% of prospect convos" },
+      { label: "Login issues", value: "44 convos" },
+      { label: "MAP test mentions", value: "41 convos" },
+      { label: "Cancellations", value: "7", note: "highest week — refund mentioned in 8 convos" },
+      { label: "Enrollment demand", value: "ongoing", note: "16 onboarding, 9 inquiries, pricing in 9 convos" },
+    ],
+    summary: "Team handled 194 conversations across 3 people while the core technical problem was outside their control.",
+  },
+  {
+    week: "Mar 9", convos: 157, cancellations: 4,
+    oneLiner: "Screener crisis resolved, enrollment converting, student channel inflecting",
+    highlights: [
+      { label: "MAP Screener", value: "16 convos", note: "down from 33 — fix confirmed" },
+      { label: "Prospect volume", value: "40", note: "down from 86 — funnel wave passed" },
+      { label: "Enrollment & Onboarding", value: "28 convos", note: "#1 category for the first time" },
+      { label: "New inquiries", value: "11", note: "4-week high — Mar 2 prospects converting" },
+      { label: "Student channel", value: "18+ convos", note: "23+ including misrouted emails" },
+      { label: "Positive Feedback", value: "9", note: "highest of any week" },
+    ],
+    summary: "A stabilization week with healthy leading indicators.",
+  },
+];
+
+function WeeklyDriverRow({ driver }) {
+  const [open, setOpen] = useState(false);
+  const peakWeek = driver.convos >= 190;
+  return (
+    <div style={{
+      background: C.borderLight, borderRadius: 12, overflow: "hidden",
+      border: peakWeek ? `1px solid ${C.orange}40` : "1px solid transparent",
+    }}>
+      <div
+        onClick={() => setOpen(!open)}
+        style={{
+          padding: "14px 18px", cursor: "pointer", userSelect: "none",
+          display: "flex", gap: 14, alignItems: "center",
+          transition: "background 0.15s ease",
+          ...(open ? { background: `${C.blue}08` } : {}),
+        }}
+      >
+        <div style={{ fontSize: 13, fontWeight: 800, color: C.blue, minWidth: 56, flexShrink: 0 }}>{driver.week}</div>
+        <div style={{
+          fontSize: 12, fontWeight: 800, color: C.text, minWidth: 56, flexShrink: 0,
+          background: peakWeek ? `${C.orange}18` : `${C.blue}10`,
+          borderRadius: 6, padding: "3px 8px", textAlign: "center",
+        }}>{driver.convos}</div>
+        <div style={{ flex: 1, fontSize: 13, color: C.textMid, lineHeight: 1.4 }}>
+          {driver.oneLiner}
+        </div>
+        <span style={{
+          fontSize: 10, color: C.blue, transition: "transform 0.2s ease",
+          display: "inline-block", transform: open ? "rotate(90deg)" : "rotate(0deg)",
+          flexShrink: 0, opacity: 0.6,
+        }}>&#9654;</span>
+      </div>
+      {open && (
+        <div style={{ padding: "0 18px 16px 88px", animation: "fadeIn 0.15s ease" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+            {driver.highlights.map((h, i) => (
+              <div key={i} style={{
+                fontSize: 12, lineHeight: 1.4, padding: "6px 10px",
+                background: C.white, borderRadius: 8, border: `1px solid ${C.border}`,
+                maxWidth: 260,
+              }}>
+                <span style={{ fontWeight: 700, color: C.text }}>{h.label}:</span>{" "}
+                <span style={{ fontWeight: 600, color: C.blue }}>{h.value}</span>
+                {h.note && <span style={{ color: C.textLight }}> — {h.note}</span>}
+              </div>
+            ))}
+          </div>
+          {driver.cancellations != null && (
+            <div style={{ fontSize: 12, color: driver.cancellations >= 5 ? C.redDark : C.textLight, marginBottom: 6 }}>
+              Cancellations: <strong>{driver.cancellations}</strong>{driver.cancellations >= 5 ? " ⚠" : ""}
+            </div>
+          )}
+          <div style={{ fontSize: 12, color: C.textMid, fontStyle: "italic", lineHeight: 1.5 }}>
+            {driver.summary}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function TeamTab({ data }) {
   return (
@@ -1073,20 +1175,20 @@ export default function Dashboard() {
 
         {/* Top bar */}
         <header style={{
-          flexShrink: 0, padding: "16px 32px",
+          flexShrink: 0, padding: "14px 32px",
           background: C.white,
           borderBottom: `1px solid ${C.border}`,
-          display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
-          <div>
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0, letterSpacing: -0.5 }}>{tabLabel}</h1>
-            <div style={{ fontSize: 12, color: C.textLight, marginTop: 2 }}>
-              {isFiltered
-                ? `Showing ${data.filteredConvos.length} filtered conversations`
-                : `${data.totalConversations} conversations across ${data.weekCount} week${data.weekCount !== 1 ? "s" : ""}`}
+          {/* Row 1: Title + Inbox */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div>
+              <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0, letterSpacing: -0.5 }}>{tabLabel}</h1>
+              <div style={{ fontSize: 12, color: C.textLight, marginTop: 2 }}>
+                {isFiltered
+                  ? `Showing ${data.filteredConvos.length} filtered conversations`
+                  : `${data.totalConversations} conversations across ${data.weekCount} week${data.weekCount !== 1 ? "s" : ""}`}
+              </div>
             </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {data.inboxOptions.length > 1 && (
               <select
                 value={inboxFilter}
@@ -1103,15 +1205,58 @@ export default function Dashboard() {
                 ))}
               </select>
             )}
-            <input type="date" value={dateRange.from || ""} onChange={e => setDateRange(r => ({ ...r, from: e.target.value }))}
-              style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, color: C.text, outline: "none" }} />
+          </div>
+          {/* Row 2: Week presets + date range */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: C.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginRight: 2 }}>Week:</span>
+            {data.weekly.length > 0 && data.weekly.map(w => {
+              const weekDates = (() => {
+                const parts = w.label.match(/([A-Za-z]+)\s+(\d+)/);
+                if (!parts) return null;
+                const monthNames = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+                const m = monthNames[parts[1]];
+                if (m == null) return null;
+                const year = data.dataDateRange.from ? parseInt(data.dataDateRange.from.slice(0, 4)) : new Date().getFullYear();
+                const from = new Date(year, m, parseInt(parts[2]));
+                const to = new Date(from);
+                to.setDate(to.getDate() + 6);
+                const fmt = d => d.toISOString().slice(0, 10);
+                return { from: fmt(from), to: fmt(to) };
+              })();
+              if (!weekDates) return null;
+              const isActive = dateRange.from === weekDates.from && dateRange.to === weekDates.to;
+              return (
+                <button key={w.label} onClick={() => {
+                  if (isActive) setDateRange({ from: "", to: "" });
+                  else setDateRange(weekDates);
+                }} style={{
+                  padding: "5px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                  cursor: "pointer", border: isActive ? "none" : `1px solid ${C.border}`,
+                  background: isActive ? C.blue : C.white,
+                  color: isActive ? "#FFF" : C.textMid,
+                  transition: "all 0.15s ease", whiteSpace: "nowrap",
+                }}>
+                  {w.label}
+                </button>
+              );
+            })}
+            <div style={{ width: 1, height: 20, background: C.border, margin: "0 4px" }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: C.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginRight: 2 }}>Custom:</span>
+            <input type="date" value={dateRange.from || ""}
+              min={data.dataDateRange.from || undefined}
+              max={dateRange.to || data.dataDateRange.to || undefined}
+              onChange={e => setDateRange(r => ({ ...r, from: e.target.value }))}
+              style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: "5px 10px", fontSize: 12, color: C.text, outline: "none" }} />
             <span style={{ color: C.textLight, fontSize: 12 }}>to</span>
-            <input type="date" value={dateRange.to || ""} onChange={e => setDateRange(r => ({ ...r, to: e.target.value }))}
-              style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, color: C.text, outline: "none" }} />
+            <input type="date" value={dateRange.to || ""}
+              min={dateRange.from || data.dataDateRange.from || undefined}
+              max={data.dataDateRange.to || undefined}
+              onChange={e => setDateRange(r => ({ ...r, to: e.target.value }))}
+              style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: "5px 10px", fontSize: 12, color: C.text, outline: "none" }} />
             {(dateRange.from || dateRange.to) && (
               <button onClick={() => setDateRange({ from: "", to: "" })} style={{
                 background: C.borderLight, border: `1px solid ${C.border}`, borderRadius: 8,
-                padding: "6px 12px", fontSize: 12, color: C.textMid,
+                padding: "5px 12px", fontSize: 11, color: C.textMid,
                 cursor: "pointer", fontWeight: 600,
               }}>Clear</button>
             )}

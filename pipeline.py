@@ -748,8 +748,14 @@ def compute_weekly_stats(conversations, categorizations):
                 "messages": agent_data["messages"],
             }
             if rt:
-                entry["median_response_min"] = round(median(rt), 1)
-                entry["response_count"] = len(rt)
+                sorted_rt = sorted(rt)
+                n = len(sorted_rt)
+                entry["median_response_min"] = round(median(sorted_rt), 1)
+                entry["mean_response_min"] = round(sum(sorted_rt) / n, 1)
+                entry["p25"] = round(sorted_rt[max(0, int(n * 0.25) - 1)], 1) if n >= 2 else round(sorted_rt[0], 1)
+                entry["p75"] = round(sorted_rt[min(n - 1, int(n * 0.75))], 1) if n >= 2 else round(sorted_rt[0], 1)
+                entry["p90"] = round(sorted_rt[min(n - 1, int(n * 0.90))], 1) if n >= 2 else round(sorted_rt[0], 1)
+                entry["response_count"] = n
             agent_stats.append(entry)
 
         # Determine the top volume driver category for this week
@@ -1175,7 +1181,7 @@ def publish_all_insights():
 
 # ═══ MAIN PIPELINE ═══
 
-def run_pipeline(csv_path, skip_categorize=False):
+def run_pipeline(csv_path, skip_categorize=False, skip_insights=False):
     """Full pipeline: CSV -> categorize -> aggregate -> write to Supabase."""
 
     print("\n" + "=" * 55)
@@ -1247,6 +1253,7 @@ def run_pipeline(csv_path, skip_categorize=False):
             "source_channel": c.get("inbox_name", c.get("source_channel", c.get("channel", ""))),
             "week_label": c.get("_week_label", ""),
             "message_count": msg_count,
+            "first_response_min": c.get("_response_minutes"),
         })
 
     # Batch insert in chunks of 50
@@ -1292,13 +1299,17 @@ def run_pipeline(csv_path, skip_categorize=False):
     print(f"  Wrote {len(hourly)} hourly pattern rows")
 
     # ── Step 6: Generate insights ──
-    print("\n[6/6] Generating insights...")
-    insights = generate_insights(weekly_stats, categorizations)
+    if skip_insights:
+        print("\n[6/6] Skipping insights (--skip-insights flag)")
+        insights = []
+    else:
+        print("\n[6/6] Generating insights...")
+        insights = generate_insights(weekly_stats, categorizations)
 
-    if insights:
-        sb_insert("weekly_insights", insights)
-        print(f"  Wrote {len(insights)} insight drafts")
-        print("\n  Run 'python pipeline.py --review-insights' to review and publish them.")
+        if insights:
+            sb_insert("weekly_insights", insights)
+            print(f"  Wrote {len(insights)} insight drafts")
+            print("\n  Run 'python pipeline.py --review-insights' to review and publish them.")
 
     # ── Done ──
     print("\n" + "=" * 55)
@@ -1334,7 +1345,8 @@ if __name__ == "__main__":
             print(f"ERROR: File not found: {csv_path}")
             sys.exit(1)
         skip = "--skip-categorize" in args
-        run_pipeline(csv_path, skip_categorize=skip)
+        skip_ins = "--skip-insights" in args
+        run_pipeline(csv_path, skip_categorize=skip, skip_insights=skip_ins)
     else:
         print("Usage:")
         print("  python pipeline.py <csv_file>              Full pipeline run")
