@@ -176,15 +176,16 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
   const agentList = Object.entries(agentMap)
     .map(([name, d]) => {
       const sorted = [...d.rts].sort((a, b) => a - b);
+      const rawMedian = med(sorted);
       return {
         name,
         conversations: d.conversations,
         messages: d.messages,
-        medianRT: med(sorted),
-        meanRT: avg(sorted),
-        p25: sorted.length > 0 ? Math.round(percentile(sorted, 0.25) * 10) / 10 : null,
-        p75: sorted.length > 0 ? Math.round(percentile(sorted, 0.75) * 10) / 10 : null,
-        p90: sorted.length > 0 ? Math.round(percentile(sorted, 0.90) * 10) / 10 : null,
+        medianRT: rawMedian != null ? Math.round(rawMedian) : null,
+        meanRT: avg(sorted) != null ? Math.round(avg(sorted)) : null,
+        p25: sorted.length > 0 ? Math.round(percentile(sorted, 0.25)) : null,
+        p75: sorted.length > 0 ? Math.round(percentile(sorted, 0.75)) : null,
+        p90: sorted.length > 0 ? Math.round(percentile(sorted, 0.90)) : null,
         responseCount: sorted.length,
         ...AGENT_DISPLAY[name],
       };
@@ -197,10 +198,10 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
     .filter(c => c.first_response_min != null && TEAM_NAMES.has(c.assigned_agent))
     .map(c => c.first_response_min)
     .sort((a, b) => a - b);
-  const teamMedianRT = med(allFilteredRTs) != null ? Math.round(med(allFilteredRTs) * 10) / 10 : null;
-  const teamMeanRT = avg(allFilteredRTs);
-  const teamP90 = allFilteredRTs.length > 0 ? Math.round(percentile(allFilteredRTs, 0.90) * 10) / 10 : null;
-  const teamP25 = allFilteredRTs.length > 0 ? Math.round(percentile(allFilteredRTs, 0.25) * 10) / 10 : null;
+  const teamMedianRT = med(allFilteredRTs) != null ? Math.round(med(allFilteredRTs)) : null;
+  const teamMeanRT = avg(allFilteredRTs) != null ? Math.round(avg(allFilteredRTs)) : null;
+  const teamP90 = allFilteredRTs.length > 0 ? Math.round(percentile(allFilteredRTs, 0.90)) : null;
+  const teamP25 = allFilteredRTs.length > 0 ? Math.round(percentile(allFilteredRTs, 0.25)) : null;
 
   const macroMap = {};
   const subMap = {};
