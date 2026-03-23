@@ -140,8 +140,9 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
   weeklyStats.forEach(w => { weekMeta[w.week_label] = w; });
 
   const filteredWeekLabels = Object.keys(weekMap).sort((a, b) => {
-    const ma = weekMeta[a], mb = weekMeta[b];
-    return (ma?.id || 0) - (mb?.id || 0);
+    // Parse "Mon DD" labels like "Feb 16", "Mar 2" into comparable dates
+    const parse = s => { const d = new Date(s + ", 2026"); return isNaN(d) ? 0 : d.getTime(); };
+    return parse(a) - parse(b);
   });
   const weekCount = filteredWeekLabels.length;
 

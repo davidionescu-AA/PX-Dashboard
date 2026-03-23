@@ -320,11 +320,18 @@ def is_real_conversation(row):
 def assign_week_label(date_str):
     """Convert a date string to a week label like 'Jan 12' (Monday of that week)."""
     try:
+        # Strip timezone offset if present (e.g., +00:00)
+        cleaned = date_str.strip()
+        if "+" in cleaned and cleaned.index("+") > 10:
+            cleaned = cleaned[:cleaned.rindex("+")]
+        elif cleaned.endswith("Z"):
+            cleaned = cleaned[:-1]
+
         # Try common Intercom date formats
         for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d",
                      "%m/%d/%Y %H:%M", "%m/%d/%Y"]:
             try:
-                dt = datetime.strptime(date_str.strip(), fmt)
+                dt = datetime.strptime(cleaned, fmt)
                 break
             except ValueError:
                 continue
@@ -792,9 +799,14 @@ def compute_hourly_patterns(conversations):
     for convo in conversations:
         date_str = convo.get("created_at", "")
         try:
+            cleaned = date_str.strip()
+            if "+" in cleaned and cleaned.index("+") > 10:
+                cleaned = cleaned[:cleaned.rindex("+")]
+            elif cleaned.endswith("Z"):
+                cleaned = cleaned[:-1]
             for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%m/%d/%Y %H:%M"]:
                 try:
-                    dt = datetime.strptime(date_str.strip(), fmt)
+                    dt = datetime.strptime(cleaned, fmt)
                     hourly[dt.hour] += 1
                     break
                 except ValueError:
@@ -1201,11 +1213,17 @@ def run_pipeline(csv_path, skip_categorize=False, skip_insights=False):
         if is_real_conversation(row):
             # Skip conversations before Jan 5
             date_str = row.get("created_at", "").strip()
+            # Strip timezone offset if present
+            cleaned_date = date_str
+            if "+" in cleaned_date and cleaned_date.index("+") > 10:
+                cleaned_date = cleaned_date[:cleaned_date.rindex("+")]
+            elif cleaned_date.endswith("Z"):
+                cleaned_date = cleaned_date[:-1]
             try:
                 for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d",
                              "%m/%d/%Y %H:%M", "%m/%d/%Y"]:
                     try:
-                        dt = datetime.strptime(date_str, fmt)
+                        dt = datetime.strptime(cleaned_date, fmt)
                         break
                     except ValueError:
                         continue
