@@ -456,7 +456,12 @@ def extract_first_response_minutes(row):
                 first_customer_ts = ts
 
     if first_customer_ts and first_admin_ts and first_admin_ts > first_customer_ts:
-        return business_hours_between(first_customer_ts, first_admin_ts)
+        minutes = business_hours_between(first_customer_ts, first_admin_ts)
+        # Discard sub-1-minute RTs — these are auto-assignments, bot handoffs,
+        # or forwarded conversations, not real human response times.
+        if minutes < 1:
+            return None
+        return minutes
 
     return None
 
