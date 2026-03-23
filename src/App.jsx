@@ -463,171 +463,147 @@ function InsightCard({ insight, defaultExpanded = false }) {
 // ═══ INSIGHTS TAB ═══
 
 function InsightsTab({ data }) {
-  const [sevFilter, setSevFilter] = useState("all");
-  const [priFilter, setPriFilter] = useState("all");
+  const parseWeekDate = s => { const d = new Date(s + ", 2026"); return isNaN(d) ? 0 : d.getTime(); };
 
-  const allInsights = data.allSignals;
-  const critCount = allInsights.filter(i => i.severity === "critical").length;
-  const warnCount = allInsights.filter(i => i.severity === "warning").length;
-  const infoCount = allInsights.filter(i => i.severity === "info").length;
-  const posCount = allInsights.filter(i => i.severity === "positive").length;
+  // Build sorted week list from available data
+  const weekLabels = [...new Set([
+    ...data.filteredConvos.map(c => c.week_label).filter(Boolean),
+  ])].sort((a, b) => parseWeekDate(a) - parseWeekDate(b));
 
-  // Apply filters
-  let filtered = allInsights;
-  if (sevFilter !== "all") filtered = filtered.filter(i => i.severity === sevFilter);
-  if (priFilter !== "all") filtered = filtered.filter(i => i.priority === priFilter);
+  const latestWeek = weekLabels.length > 0 ? weekLabels[weekLabels.length - 1] : null;
 
-  const criticalWarnings = filtered.filter(i => i.severity === "critical" || i.severity === "warning");
-  const positive = filtered.filter(i => i.severity === "positive");
-  const info = filtered.filter(i => i.severity === "info");
+  const [selectedWeek, setSelectedWeek] = useState(latestWeek);
+  const [showPrevious, setShowPrevious] = useState(false);
+  const [view, setView] = useState("weekly"); // "weekly" | "monthly"
 
-  // Sort: critical before warning, then by priority
-  const priOrder = { P1: 0, P2: 1, P3: 2 };
-  const sevOrder = { critical: 0, warning: 1, info: 2, positive: 3 };
-  const sortFn = (a, b) => {
-    const sd = (sevOrder[a.severity] ?? 9) - (sevOrder[b.severity] ?? 9);
-    if (sd !== 0) return sd;
-    return (priOrder[a.priority] ?? 9) - (priOrder[b.priority] ?? 9);
-  };
-  criticalWarnings.sort(sortFn);
-  info.sort(sortFn);
+  // Build month groups from weeks
+  const monthGroups = {};
+  weekLabels.forEach(wl => {
+    const d = new Date(wl + ", 2026");
+    if (!isNaN(d)) {
+      const monthKey = d.toLocaleString("default", { month: "long", year: "numeric" });
+      if (!monthGroups[monthKey]) monthGroups[monthKey] = [];
+      monthGroups[monthKey].push(wl);
+    }
+  });
+  const monthKeys = Object.keys(monthGroups);
+  const latestMonth = monthKeys.length > 0 ? monthKeys[monthKeys.length - 1] : null;
+  const [selectedMonth, setSelectedMonth] = useState(latestMonth);
+
+  // Previous weeks = all except the most recent
+  const previousWeeks = weekLabels.slice(0, -1).reverse();
 
   return (
     <>
-      {/* Summary strip */}
+      {/* View toggle: Weekly / Monthly */}
       <div style={{
-        display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24, marginTop: 8,
+        display: "flex", gap: 4, marginBottom: 24, marginTop: 8,
+        background: C.borderLight, borderRadius: 10, padding: 4, width: "fit-content",
       }}>
-        {[
-          { label: "Total Signals", value: allInsights.length, color: C.navy },
-          { label: "Critical", value: critCount, color: C.redDark },
-          { label: "Warning", value: warnCount, color: C.yellowDark },
-          { label: "Positive", value: posCount, color: C.greenDark },
-          { label: "Informational", value: infoCount, color: C.blueDark },
-        ].map(s => (
-          <div key={s.label} style={{
-            padding: "14px 20px", background: C.white, borderRadius: 12,
-            border: `1px solid ${C.border}`, flex: "1 1 140px", minWidth: 120,
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight, marginBottom: 4 }}>{s.label}</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
-          </div>
+        {[{ key: "weekly", label: "Weekly" }, { key: "monthly", label: "Monthly" }].map(v => (
+          <button key={v.key} onClick={() => setView(v.key)} style={{
+            border: "none", cursor: "pointer",
+            padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+            background: view === v.key ? C.white : "transparent",
+            color: view === v.key ? C.navy : C.textLight,
+            boxShadow: view === v.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            transition: "all 0.15s ease",
+          }}>{v.label}</button>
         ))}
       </div>
 
-      {/* Filter bar */}
-      <div style={{
-        display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24,
-        padding: "14px 18px", background: C.white, borderRadius: 12,
-        border: `1px solid ${C.border}`,
-      }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, display: "flex", alignItems: "center", marginRight: 4 }}>Severity:</div>
-        <Pill label="All" active={sevFilter === "all"} onClick={() => setSevFilter("all")} count={allInsights.length} />
-        <Pill label="Critical" active={sevFilter === "critical"} onClick={() => setSevFilter("critical")} count={critCount} color={C.redDark} />
-        <Pill label="Warning" active={sevFilter === "warning"} onClick={() => setSevFilter("warning")} count={warnCount} color={C.yellowDark} />
-        <Pill label="Positive" active={sevFilter === "positive"} onClick={() => setSevFilter("positive")} count={posCount} color={C.greenDark} />
-        <Pill label="Info" active={sevFilter === "info"} onClick={() => setSevFilter("info")} count={infoCount} color={C.blueDark} />
-
-        <div style={{ width: 1, background: C.border, margin: "0 8px" }} />
-
-        <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, display: "flex", alignItems: "center", marginRight: 4 }}>Priority:</div>
-        <Pill label="All" active={priFilter === "all"} onClick={() => setPriFilter("all")} />
-        {["P1", "P2", "P3"].map(p => (
-          <Pill key={p} label={p} active={priFilter === p} onClick={() => setPriFilter(p)}
-            count={allInsights.filter(i => i.priority === p).length}
-            color={PRI[p]?.color} />
-        ))}
-      </div>
-
-      {/* ── NEEDS ATTENTION ── */}
-      {criticalWarnings.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
-            padding: "10px 16px", background: "linear-gradient(135deg, #FEF2F2, #FFFBEB)",
-            borderRadius: 10, border: `1px solid #FECACA`,
-          }}>
-            <span style={{ fontSize: 16 }}>⚠</span>
-            <span style={{ fontSize: 14, fontWeight: 800, color: C.redDark }}>Needs Attention</span>
-            <span style={{ fontSize: 12, color: C.textLight, marginLeft: 4 }}>{criticalWarnings.length} signal{criticalWarnings.length !== 1 ? "s" : ""}</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {criticalWarnings.map((s, i) => (
-              <InsightCard key={s.id || i} insight={s} defaultExpanded={s.severity === "critical"} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── POSITIVE ── */}
-      {positive.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
-            padding: "10px 16px", background: "linear-gradient(135deg, #F0FDF4, #ECFDF5)",
-            borderRadius: 10, border: `1px solid #BBF7D0`,
-          }}>
-            <span style={{ fontSize: 16 }}>✦</span>
-            <span style={{ fontSize: 14, fontWeight: 800, color: C.greenDark }}>Positive Signals</span>
-            <span style={{ fontSize: 12, color: C.textLight, marginLeft: 4 }}>{positive.length} signal{positive.length !== 1 ? "s" : ""}</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {positive.map((s, i) => <InsightCard key={s.id || i} insight={s} />)}
-          </div>
-        </div>
-      )}
-
-      {/* ── INTELLIGENCE ── */}
-      {info.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
-            padding: "10px 16px", background: "linear-gradient(135deg, #EFF6FF, #F0F9FF)",
-            borderRadius: 10, border: `1px solid #BFDBFE`,
-          }}>
-            <span style={{ fontSize: 16 }}>◈</span>
-            <span style={{ fontSize: 14, fontWeight: 800, color: C.blueDark }}>Intelligence</span>
-            <span style={{ fontSize: 12, color: C.textLight, marginLeft: 4 }}>{info.length} signal{info.length !== 1 ? "s" : ""}</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {info.map((s, i) => <InsightCard key={s.id || i} insight={s} />)}
-          </div>
-        </div>
-      )}
-
-      {/* ── NOISE ── */}
-      {data.noise.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
-            padding: "10px 16px", background: C.borderLight,
-            borderRadius: 10, border: `1px solid ${C.border}`,
-          }}>
-            <span style={{ fontSize: 16, opacity: 0.4 }}>◌</span>
-            <span style={{ fontSize: 14, fontWeight: 800, color: C.textLight }}>Noise — Don't React</span>
-            <span style={{ fontSize: 12, color: C.textLight, marginLeft: 4 }}>Metrics that look off but have structural explanations</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {data.noise.map((n, i) => (
-              <div key={i} style={{
-                background: C.borderLight, border: `1px solid ${C.border}`, borderRadius: 12,
-                padding: "16px 22px", display: "flex", gap: 14, alignItems: "flex-start",
-              }}>
-                <div style={{ fontSize: 18, opacity: 0.4, flexShrink: 0, marginTop: 2 }}>{n.icon || "—"}</div>
+      {view === "weekly" && (
+        <>
+          {/* Current week header */}
+          {latestWeek && (
+            <Card style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: C.textMid, marginBottom: 4 }}>{n.title}</div>
-                  <div style={{ fontSize: 13, color: C.textLight, lineHeight: 1.6 }}>{n.body}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight, marginBottom: 4 }}>Current Week</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: C.navy }}>Week of {latestWeek}</div>
                 </div>
+                <div style={{
+                  padding: "6px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+                  background: C.borderLight, color: C.textLight,
+                }}>No insights yet</div>
               </div>
-            ))}
-          </div>
-        </div>
+            </Card>
+          )}
+
+          {/* Empty state for current week */}
+          <Card style={{ padding: 48, textAlign: "center", marginBottom: 32 }}>
+            <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◆</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>Weekly insights will appear here</div>
+            <div style={{ fontSize: 13, color: C.textLight, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
+              Signals, trends, and action items for the week of {latestWeek || "—"} will be added soon.
+            </div>
+          </Card>
+
+          {/* Previous weeks toggle */}
+          {previousWeeks.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <button onClick={() => setShowPrevious(!showPrevious)} style={{
+                border: "none", cursor: "pointer", background: "transparent",
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "10px 0", fontSize: 13, fontWeight: 600, color: C.textLight,
+              }}>
+                <span style={{
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  width: 20, height: 20, borderRadius: 6, background: C.borderLight,
+                  fontSize: 10, transition: "transform 0.2s ease",
+                  transform: showPrevious ? "rotate(90deg)" : "rotate(0deg)",
+                }}>▶</span>
+                Previous Weeks ({previousWeeks.length})
+              </button>
+
+              {showPrevious && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                  {previousWeeks.map(wl => (
+                    <Card key={wl} style={{ padding: "16px 22px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: C.navy }}>Week of {wl}</div>
+                        <div style={{
+                          padding: "4px 12px", borderRadius: 16, fontSize: 11, fontWeight: 600,
+                          background: C.borderLight, color: C.textLight,
+                        }}>No insights</div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
-      {filtered.length === 0 && (
-        <Card style={{ padding: 48, textAlign: "center" }}>
-          <div style={{ fontSize: 14, color: C.textLight }}>No insights match the current filters</div>
-        </Card>
+      {view === "monthly" && (
+        <>
+          {/* Month selector pills */}
+          {monthKeys.length > 0 && (
+            <div style={{
+              display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20,
+            }}>
+              {monthKeys.map(mk => (
+                <button key={mk} onClick={() => setSelectedMonth(mk)} style={{
+                  border: `1px solid ${selectedMonth === mk ? C.navy : C.border}`,
+                  background: selectedMonth === mk ? C.navy : C.white,
+                  color: selectedMonth === mk ? "white" : C.textMid,
+                  borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600,
+                  cursor: "pointer", transition: "all 0.15s ease",
+                }}>{mk}</button>
+              ))}
+            </div>
+          )}
+
+          {/* Monthly empty state */}
+          <Card style={{ padding: 48, textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◈</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>Monthly insights will appear here</div>
+            <div style={{ fontSize: 13, color: C.textLight, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
+              A consolidated monthly view for {selectedMonth || "—"} covering trends, patterns, and recommendations across all weeks.
+            </div>
+          </Card>
+        </>
       )}
     </>
   );
@@ -646,18 +622,6 @@ function OverviewTab({ data, avgWeeklyVol, volRtData }) {
         <StatCard label="Team" value={data.agentList.length} sub={`${data.realAgentConvos} convos handled`} icon="👥" />
       </div>
 
-      {/* Signals summary */}
-      {data.allSignals.length > 0 && (
-        <>
-          <Sec sub="Top signals from this period">Key Signals</Sec>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {data.allSignals
-              .filter(s => s.severity === "critical" || s.severity === "warning")
-              .slice(0, 3)
-              .map((s, i) => <InsightCard key={s.id || i} insight={s} />)}
-          </div>
-        </>
-      )}
 
       {/* Volume trend */}
       {volRtData.length > 1 && (
@@ -1145,14 +1109,6 @@ export default function Dashboard() {
               }}>
                 <span style={{ fontSize: 14, width: 20, textAlign: "center", opacity: active ? 1 : 0.5 }}>{t.icon}</span>
                 {t.label}
-                {t.key === "insights" && data.allSignals.length > 0 && (
-                  <span style={{
-                    marginLeft: "auto", fontSize: 10, fontWeight: 800,
-                    background: active ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)",
-                    color: active ? "white" : "rgba(255,255,255,0.4)",
-                    borderRadius: 6, padding: "2px 7px",
-                  }}>{data.allSignals.length}</span>
-                )}
               </button>
             );
           })}
