@@ -473,7 +473,6 @@ function InsightsTab({ data }) {
   const latestWeek = weekLabels.length > 0 ? weekLabels[weekLabels.length - 1] : null;
 
   const [selectedWeek, setSelectedWeek] = useState(latestWeek);
-  const [showPrevious, setShowPrevious] = useState(false);
   const [view, setView] = useState("weekly"); // "weekly" | "monthly"
 
   // Build month groups from weeks
@@ -489,9 +488,6 @@ function InsightsTab({ data }) {
   const monthKeys = Object.keys(monthGroups);
   const latestMonth = monthKeys.length > 0 ? monthKeys[monthKeys.length - 1] : null;
   const [selectedMonth, setSelectedMonth] = useState(latestMonth);
-
-  // Previous weeks = all except the most recent
-  const previousWeeks = weekLabels.slice(0, -1).reverse();
 
   return (
     <>
@@ -514,65 +510,31 @@ function InsightsTab({ data }) {
 
       {view === "weekly" && (
         <>
-          {/* Current week header */}
-          {latestWeek && (
-            <Card style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight, marginBottom: 4 }}>Current Week</div>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: C.navy }}>Week of {latestWeek}</div>
-                </div>
-                <div style={{
-                  padding: "6px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700,
-                  background: C.borderLight, color: C.textLight,
-                }}>No insights yet</div>
-              </div>
-            </Card>
+          {/* Week selector pills */}
+          {weekLabels.length > 0 && (
+            <div style={{
+              display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20,
+            }}>
+              {weekLabels.map(wl => (
+                <button key={wl} onClick={() => setSelectedWeek(wl)} style={{
+                  border: `1px solid ${selectedWeek === wl ? C.navy : C.border}`,
+                  background: selectedWeek === wl ? C.navy : C.white,
+                  color: selectedWeek === wl ? "white" : C.textMid,
+                  borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600,
+                  cursor: "pointer", transition: "all 0.15s ease",
+                }}>Week of {wl}</button>
+              ))}
+            </div>
           )}
 
-          {/* Empty state for current week */}
-          <Card style={{ padding: 48, textAlign: "center", marginBottom: 32 }}>
+          {/* Weekly empty state */}
+          <Card style={{ padding: 48, textAlign: "center" }}>
             <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◆</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>Weekly insights will appear here</div>
             <div style={{ fontSize: 13, color: C.textLight, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
-              Signals, trends, and action items for the week of {latestWeek || "—"} will be added soon.
+              Signals, trends, and action items for the week of {selectedWeek || "—"} will be added soon.
             </div>
           </Card>
-
-          {/* Previous weeks toggle */}
-          {previousWeeks.length > 0 && (
-            <div style={{ marginBottom: 24 }}>
-              <button onClick={() => setShowPrevious(!showPrevious)} style={{
-                border: "none", cursor: "pointer", background: "transparent",
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "10px 0", fontSize: 13, fontWeight: 600, color: C.textLight,
-              }}>
-                <span style={{
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  width: 20, height: 20, borderRadius: 6, background: C.borderLight,
-                  fontSize: 10, transition: "transform 0.2s ease",
-                  transform: showPrevious ? "rotate(90deg)" : "rotate(0deg)",
-                }}>▶</span>
-                Previous Weeks ({previousWeeks.length})
-              </button>
-
-              {showPrevious && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
-                  {previousWeeks.map(wl => (
-                    <Card key={wl} style={{ padding: "16px 22px" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: C.navy }}>Week of {wl}</div>
-                        <div style={{
-                          padding: "4px 12px", borderRadius: 16, fontSize: 11, fontWeight: 600,
-                          background: C.borderLight, color: C.textLight,
-                        }}>No insights</div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </>
       )}
 
@@ -1138,7 +1100,7 @@ export default function Dashboard() {
           borderBottom: `1px solid ${C.border}`,
         }}>
           {/* Row 1: Title + Inbox */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tab === "insights" ? 0 : 12 }}>
             <div>
               <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0, letterSpacing: -0.5 }}>{tabLabel}</h1>
               <div style={{ fontSize: 12, color: C.textLight, marginTop: 2 }}>
@@ -1147,7 +1109,7 @@ export default function Dashboard() {
                   : `${data.totalConversations} conversations across ${data.weekCount} week${data.weekCount !== 1 ? "s" : ""}`}
               </div>
             </div>
-            {data.inboxOptions.length > 1 && (
+            {tab !== "insights" && data.inboxOptions.length > 1 && (
               <select
                 value={inboxFilter}
                 onChange={e => setInboxFilter(e.target.value)}
@@ -1164,8 +1126,8 @@ export default function Dashboard() {
               </select>
             )}
           </div>
-          {/* Row 2: Week presets + date range */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          {/* Row 2: Week presets + date range (hidden on Insights tab) */}
+          {tab !== "insights" && <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: C.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginRight: 2 }}>Week:</span>
             {data.weekly.length > 0 && data.weekly.map(w => {
               const weekDates = (() => {
@@ -1218,7 +1180,7 @@ export default function Dashboard() {
                 cursor: "pointer", fontWeight: 600,
               }}>Clear</button>
             )}
-          </div>
+          </div>}
         </header>
 
         {/* Scrollable content */}
