@@ -59,6 +59,7 @@ const TABS = [
   { key: "categories", label: "Categories", icon: "▦" },
   { key: "volume", label: "Volume & RT", icon: "▲" },
   { key: "team", label: "Team", icon: "●" },
+  { key: "attrition", label: "Attrition", icon: "⟁" },
 ];
 
 // ═══ DATA HOOKS ═══
@@ -977,6 +978,311 @@ function TeamTab({ data }) {
   );
 }
 
+// ═══ ATTRITION TAB ═══
+
+const ATTRITION_PROFILES = [{"parent":"Cheryl Turner","students":"Thomas Turner","start":"2025-09-15","cancel":"2025-12-01","convos":8,"classification":"preventable","category":"Technical Issues","summary":"Dash not registering completed work repeatedly. Science stuck. Cumulative platform reliability failures over 2.5 months."},{"parent":"Kirk Konert","students":"Kiara, Kora Konert","start":"2025-10-13","cancel":"2025-12-23","convos":5,"classification":"preventable","category":"Technical Issues","summary":"Bracketing confusion. IXL and Zearn login issues. Two kids, both hit the same Day 1 technical walls."},{"parent":"Erin Dvorak","students":"James, Jonah Dvorak","start":"2025-10-13","cancel":"2025-12-01","convos":4,"classification":"preventable","category":"Technical Issues","summary":"Parent Dash login failures. Science not updating. AlphaWrite access issues."},{"parent":"Amy Wheeler","students":"Noah, Skylar Wheeler","start":"2025-09-15","cancel":"2025-11-20","convos":12,"classification":"preventable","category":"Technical Issues","summary":"Highly engaged. Reading disappeared, science stuck, Dash not registering work. StudyReel issues. Cumulative reliability breakdown."},{"parent":"Kara Porterfield","students":"Nathan Porterfield","start":"2025-09-15","cancel":"2025-12-15","convos":6,"classification":"preventable","category":"Engagement","summary":"Low engagement from child. Parent struggled to get Nathan to complete 2 hours daily. Content not compelling enough."},{"parent":"Amanda Nigg","students":"Jackson, Stella Nigg","start":"2025-09-15","cancel":"2025-12-01","convos":26,"classification":"preventable","category":"Process Failure","summary":"Cancellation email lost for 4 days. Charged over weekend before response. Most conversations in original dataset. Trust destroyed by billing mishap."},{"parent":"Rebecca Hamaoui","students":"Romy Hamaoui","start":"2025-10-13","cancel":"2025-12-11","convos":3,"classification":"involuntary","category":"Life Event","summary":"Family circumstances changed. Minimal technical issues. Clean exit."},{"parent":"Veronica Max","students":"Jackson Max","start":"2025-09-15","cancel":"2025-12-23","convos":9,"classification":"preventable","category":"Process Failure","summary":"Alphie dead-end experiences. Tried to get human help, couldn\u2019t break through bot layer. Cancel button UX issues."},{"parent":"Maryam Ehtsham","students":"Hassan Abdullah","start":"2025-08-18","cancel":"2026-04-01","convos":14,"classification":"preventable","category":"Process Failure","summary":"Charged after cancellation request. Weekend timing meant no response before billing cycle. Payment processing failure."},{"parent":"Elliot Cunningham","students":"Dylan Cunningham","start":"2025-09-15","cancel":"2025-12-01","convos":7,"classification":"preventable","category":"Technical Issues","summary":"Science lessons stuck. Dash not counting completed work. Reading disappeared."},{"parent":"Joanna Nebab","students":"Sophia Nebab","start":"2025-10-13","cancel":"2026-01-05","convos":4,"classification":"preventable","category":"Engagement","summary":"Child disengaged. Parent couldn\u2019t sustain motivation. Content fit issues."},{"parent":"Carolina Paulon","students":"Samuel Paulon","start":"2025-09-15","cancel":"2025-12-01","convos":3,"classification":"involuntary","category":"Life Event","summary":"Returning to Brazil. Geographic/life change, not platform driven."},{"parent":"Brian Bates","students":"Maya Bates","start":"2025-09-15","cancel":"2025-12-15","convos":5,"classification":"preventable","category":"Technical Issues","summary":"Dash not registering work. Bracketing confusion. Technical friction cumulative."},{"parent":"John Quintero","students":"Julian Quintero","start":"2025-10-01","cancel":"2025-12-01","convos":3,"classification":"preventable","category":"Value/Fit","summary":"Program not matching expectations. Short tenure with minimal engagement."},{"parent":"Dana Pereira","students":"Madeline, Olivia Pereira","start":"2025-10-13","cancel":"2025-12-23","convos":6,"classification":"preventable","category":"Technical Issues","summary":"IXL issues. Science stuck. Two kids both experiencing same platform problems."},{"parent":"Jay Shah","students":"Krish Shah","start":"2025-09-15","cancel":"2025-12-01","convos":8,"classification":"preventable","category":"Process Failure","summary":"Cancel portal UX failure. Couldn\u2019t find how to cancel. Searched help center for \u2018cancel\u2019."},{"parent":"Pavel Gavrichev","students":"Nika Gavrichev","start":"2025-10-13","cancel":"2025-12-15","convos":2,"classification":"involuntary","category":"Life Event","summary":"Family relocation. Clean exit unrelated to platform."},{"parent":"Josh Timonen","students":"Ripley Timonen","start":"2025-10-13","cancel":"2025-12-15","convos":4,"classification":"preventable","category":"Technical Issues","summary":"Bracketing issues. Platform reliability."},{"parent":"Katie Anderson","students":"Ainsley, Emory Anderson","start":"2025-10-27","cancel":"2025-12-23","convos":6,"classification":"preventable","category":"Technical Issues","summary":"Science video didn\u2019t match questions. Dash not counting work. Two kids."},{"parent":"Enoch Owen","students":"Amara, Christian Owen","start":"2025-09-15","cancel":"2025-12-01","convos":7,"classification":"preventable","category":"Engagement","summary":"Children not engaging with content. Parent struggled to sustain daily routine."},{"parent":"Eric Breon","students":"Luke, Owen Breon","start":"2025-10-13","cancel":"2025-12-15","convos":5,"classification":"preventable","category":"Technical Issues","summary":"IXL login. Dash issues. Two kids."},{"parent":"Yinlai Meng","students":"Derek Meng","start":"2025-10-27","cancel":"2025-12-23","convos":3,"classification":"involuntary","category":"Life Event","summary":"Family circumstances changed. Minimal engagement."},{"parent":"Alexander McLawhorn","students":"Dominic McLawhorn","start":"2025-10-13","cancel":"2026-01-05","convos":4,"classification":"preventable","category":"Technical Issues","summary":"StudyReel crashes. Platform reliability issues."},{"parent":"Xavior Bringas","students":"Elijah Bringas","start":"2025-09-15","cancel":"2025-12-01","convos":3,"classification":"preventable","category":"Engagement","summary":"Low engagement. Child not connecting with content format."},{"parent":"Thomas Upchurch","students":"Garrett (cancelled), Mason (active)","start":"2025-09-15","cancel":"2025-12-01","convos":5,"classification":"preventable","category":"Engagement","summary":"Partial churn: one child cancelled, sibling stayed. Garrett disengaged while Mason thrived."},{"parent":"Stephen O\u2019Neal","students":"Cannon O\u2019Neal","start":"2025-09-15","cancel":"2025-12-15","convos":10,"classification":"transfer","category":"Advanced Student","summary":"Transferred to GT Anywhere. Cannon too advanced for AA Rocket Math. Doing 5+1 sums as a 7th grader."},{"parent":"Storie Esquell","students":"Eden Esquell","start":"2025-10-13","cancel":"2026-01-05","convos":3,"classification":"preventable","category":"Technical Issues","summary":"Bracketing issues. StudyReel problems."},{"parent":"Faith Bowen","students":"Dakota Bowen","start":"2025-09-15","cancel":"2025-11-20","convos":4,"classification":"preventable","category":"Special Needs","summary":"Dakota has dyslexia. No accommodations pathway available. Family needed text-to-speech and modified content."},{"parent":"Nicholas Burdick","students":"Nora Burdick","start":"2025-10-13","cancel":"2025-12-15","convos":2,"classification":"preventable","category":"Engagement","summary":"Low engagement. Child didn\u2019t connect with self-directed format."},{"parent":"Catherine Besk","students":"Estelle Besk","start":"2025-10-27","cancel":"2025-12-23","convos":3,"classification":"preventable","category":"Technical Issues","summary":"Platform reliability issues. Science not updating."},{"parent":"John Creedon","students":"Noel Creedon","start":"2025-10-13","cancel":"2025-12-15","convos":2,"classification":"preventable","category":"Value/Fit","summary":"Program not matching family expectations for the price."},{"parent":"Lauren McCullough","students":"Leona (cancelled), Leo (active)","start":"2025-09-15","cancel":"2025-12-01","convos":5,"classification":"preventable","category":"Engagement","summary":"Partial churn. Leona disengaged, Leo continued. Gender/engagement pattern."},{"parent":"Aimee Perry","students":"Tennyson Perry","start":"2025-10-13","cancel":"2025-12-23","convos":3,"classification":"preventable","category":"Technical Issues","summary":"Dash not registering work. Platform reliability."},{"parent":"ekah markey","students":"Caleb Markey","start":"2025-09-15","cancel":"2025-12-01","convos":2,"classification":"preventable","category":"Engagement","summary":"Minimal contact. Silent churn with low engagement."},{"parent":"Jan Schaefer","students":"Lena Schaefer","start":"2025-10-27","cancel":"2025-12-23","convos":3,"classification":"preventable","category":"Technical Issues","summary":"StudyReel issues. Platform reliability."},{"parent":"Channing Ross","students":"Zion Ross","start":"2025-10-01","cancel":"2025-11-20","convos":2,"classification":"preventable","category":"Engagement","summary":"Short tenure. Minimal engagement before exit."},{"parent":"Jenny Kheng","students":"Noah Kheng","start":"2025-10-13","cancel":"2025-12-15","convos":3,"classification":"preventable","category":"Technical Issues","summary":"Bracketing confusion. IXL issues."},{"parent":"Ron Beck","students":"Mariana Beck","start":"2025-09-15","cancel":"2025-12-01","convos":5,"classification":"preventable","category":"Engagement","summary":"Content not compelling for child. Parent struggled with daily routine."},{"parent":"Unnur Gretarsdottir","students":"Sara Gretarsdottir","start":"2025-10-13","cancel":"2025-12-23","convos":2,"classification":"involuntary","category":"Life Event","summary":"International family. Circumstances changed."},{"parent":"Jeff Bezner","students":"Ben Bezner","start":"2026-03-09","cancel":"2026-04-01","convos":2,"classification":"preventable","category":"Engagement","summary":"Missed kickoff. Referrer was help center policies page. Minimal engagement before exit."},{"parent":"Lauren Cole","students":"Stella Cole","start":"2025-10-13","cancel":"2026-04-01","convos":46,"classification":"preventable","category":"Technical Issues","summary":"HIGHEST engagement in dataset. Grandmother fought for 6 months. StudyReel quarantined by antivirus repeatedly, reading/writing/science disappearing, kicked from 7th to 3rd grade writing. Every app had login issues."},{"parent":"Sean & Tania Donovan","students":"Paula Donovan","start":"2026-01-26","cancel":"2026-04-01","convos":3,"classification":"preventable","category":"Engagement","summary":"Light engagement. Meeting scheduling with Brittany. Joe handled a date error."},{"parent":"Lina Godfrey","students":"Alia Godfrey","start":"2025-11-10","cancel":"2026-04-01","convos":8,"classification":"preventable","category":"Process Failure","summary":"Angry: \u2018Your system does not allow me to cancel and your bots won\u2019t let me speak to a human.\u2019 StudyReel glitches, MAP proctor failures."},{"parent":"Dylan Cohen","students":"Lexssa Link, Jack (never started)","start":"2026-01-05","cancel":"2026-04-01","convos":21,"classification":"preventable","category":"Coach Departure","summary":"Coach Harley left. Family didn\u2019t want replacement. Also hit bracketing, Rocket Math too low, Dash not counting, billing discrepancy, IXL login."},{"parent":"Jaclyn Porto","students":"Jack Porto, Ryan Porto","start":"2025-03-17","cancel":"2026-04-01","convos":4,"classification":"preventable","category":"Value/Fit","summary":"Changing homeschool program after long tenure. MAP report request. Ryan cancelled earlier."},{"parent":"William Thannisch","students":"Conrad, Luke, Rhett","start":"2025-10-27","cancel":"2026-04-01","convos":16,"classification":"transfer","category":"Advanced Student","summary":"GT Anywhere transfer. Luke \u2018bored and doesn\u2019t feel challenged.\u2019 Subjects disappearing, Fast Math not recording, bracketing confusion."},{"parent":"Emily Christiansen","students":"Jonathan & William Tingey, Grace (never started)","start":"2026-01-26","cancel":"2026-04-01","convos":8,"classification":"involuntary","category":"Seasonal Pause","summary":"\u2018May return Aug/Sep.\u2019 Missed kickoff, Dash not loading, typed \u2018agent\u2019 and \u2018human\u2019 to bypass Alphie. Pause, not permanent."},{"parent":"Alex Talbot","students":"Jack Talbot","start":"2026-02-16","cancel":"2026-03-17","convos":6,"classification":"preventable","category":"Technical Issues","summary":"29 days. AlphaWrite CAPTCHA broken. Bracketing status confusion. Thanked Krys for professionalism. Refund request."},{"parent":"Amanda Shipka","students":"Dotty Buehler","start":"","cancel":"2026-02-13","convos":0,"classification":"involuntary","category":"Internal/Test","summary":"Internal/test account with 10 fake learners. localhost referrer. SKIP."},{"parent":"Sandeep Kella","students":"Aryn, Asreena, Sahana (never started)","start":"2025-09-15","cancel":"2026-02-02","convos":7,"classification":"preventable","category":"Value/Fit","summary":"\u2018It hasn\u2019t been what we expected.\u2019 IXL issues. ClassBank. 3rd child never started."},{"parent":"Ryan Sullivan","students":"Ryan Sullivan","start":"2025-12-08","cancel":"2026-02-02","convos":3,"classification":"preventable","category":"Technical Issues","summary":"Account issues resolved by Nene. Phishing email incident. Minimal signal."},{"parent":"Amie Wilson","students":"Kieren Wilson","start":"2025-09-15","cancel":"2026-02-02","convos":1,"classification":"preventable","category":"Engagement","summary":"Dad asked for own Parent Dash access. Referrer searched \u2018alpha bucks.\u2019 Mostly silent."},{"parent":"Sterling Snead","students":"Ace & Ian Snead","start":"2025-09-03","cancel":"2026-01-29","convos":4,"classification":"preventable","category":"Technical Issues","summary":"Microschool operator (Silver Creek Academy). StudyReel/Dash issues. Payment issue post-cancellation. Graceful exit acknowledging positive impact."},{"parent":"Desmond Brand","students":"Andromeda Brand","start":"2025-10-01","cancel":"2026-01-23","convos":1,"classification":"preventable","category":"Engagement","summary":"\u2018We\u2019ve stopped using 2HL/Alpha and need to unsubscribe.\u2019 One message, no explanation."},{"parent":"Keely Denenberg","students":"Leo Denenberg","start":"2025-10-13","cancel":"2026-01-23","convos":5,"classification":"preventable","category":"Technical Issues","summary":"Parent Dash login failure Day 1. Language lessons question. Alpha coins question."},{"parent":"Jason Hujet","students":"Jack Hujet","start":"2025-10-13","cancel":"2026-01-23","convos":5,"classification":"preventable","category":"Technical Issues","summary":"Login issue Day 1 (wrong email). Halloween check-in on progress. Meeting with Joe."},{"parent":"Martin Key","students":"Arabella & Archie Key","start":"2025-09-15","cancel":"2026-01-23","convos":2,"classification":"involuntary","category":"Life Event","summary":"ESA family moving houses. Searched \u2018cancel\u2019 in help center. UK family in Florida."},{"parent":"Renee Warren","students":"Max & Noah Martell","start":"2025-11-01","cancel":"2026-01-23","convos":3,"classification":"preventable","category":"Value/Fit","summary":"Nanny/assistant handled comms. Re-enrolling in public school. Bracketing questions. IXL expired."},{"parent":"Linda Sapolsky","students":"Hannah & Harrison","start":"2025-11-10","cancel":"2026-01-23","convos":5,"classification":"preventable","category":"Process Failure","summary":"\u2018I keep emailing and not hearing back. I want to cancel for both children.\u2019 Lost cancellation request. MAP test not showing."},{"parent":"Jerin Schreiber","students":"Annabella Schreiber","start":"2025-10-13","cancel":"2026-01-23","convos":7,"classification":"preventable","category":"Technical Issues","summary":"Missing grade field in enrollment. MAP session at capacity error. ESA (FL Step Up)."},{"parent":"Nandini Patel","students":"Zev Thakkar","start":"2025-12-08","cancel":"2026-01-23","convos":5,"classification":"involuntary","category":"Seasonal Pause","summary":"\u2018Strongly believe in Alpha but over committed this winter/spring.\u2019 Zearn login issue. Mary shared microschool info. Pause."},{"parent":"elizabeth Katzman","students":"Ben & Harlow Katzman","start":"2025-10-13","cancel":"2026-01-05","convos":11,"classification":"preventable","category":"Technical Issues","summary":"Harlow science stuck repeatedly. Rocket Math confusion. Ben couldn\u2019t access classes. VOE request. Transcript needed for PCDS school application."},{"parent":"Saverio La Francesca","students":"Alessandra","start":"2025-09-15","cancel":"2026-01-05","convos":3,"classification":"preventable","category":"Engagement","summary":"IXL account setup. ClassBank. Minimal engagement."},{"parent":"Brian Marcinek","students":"Milan Marcinek","start":"2025-10-27","cancel":"2026-01-05","convos":1,"classification":"preventable","category":"Engagement","summary":"ClassBank only conversation. Silent exit."},{"parent":"Sierra Pack","students":"Daxton, India, Jett, Kiya","start":"2025-09-15","cancel":"2026-01-05","convos":1,"classification":"preventable","category":"Process Failure","summary":"4 kids, 1 conversation: \u2018I can\u2019t figure out how to cancel.\u2019 Searched \u2018cancel\u2019 in help center. Purest cancel-button UX failure."},{"parent":"Ari Rastegar","students":"Victoria Rastegar","start":"2025-10-13","cancel":"2026-01-05","convos":4,"classification":"preventable","category":"Technical Issues","summary":"Joe personally reached out AND processed cancellation with \u2018apology and regret.\u2019 Something warranted leadership involvement."},{"parent":"DeVante Warren","students":"Westen Warren","start":"2025-09-15","cancel":"","convos":0,"classification":"preventable","category":"Silent","summary":"Zero conversations. Complete ghost. No cancel date in system."},{"parent":"Emma Bowes","students":"Jack, Mia, Oliver Bowes","start":"2025-09-15","cancel":"2025-12-30","convos":13,"classification":"involuntary","category":"Life Event","summary":"Australian family returning home. Warm departure. But Jack (14) was doing 5+1 in Rocket Math, confirming advanced student pattern."},{"parent":"Duran Torrez","students":"Calder Torrez","start":"2025-11-10","cancel":"2025-12-29","convos":4,"classification":"preventable","category":"Technical Issues","summary":"Confused about kickoff time (PST vs CDT). Unenrollment via Krys."},{"parent":"Ashlea Stares","students":"Beckett & Sully Stares","start":"2025-10-01","cancel":"2025-12-27","convos":2,"classification":"involuntary","category":"Life Event","summary":"Health issues with Beckett. Asked to pause. Science not showing for a week."},{"parent":"Christina Fenters","students":"Jack Fenters","start":"2025-10-13","cancel":"2025-12-23","convos":3,"classification":"preventable","category":"Value/Fit","summary":"\u2018Not a good fit after a quarter.\u2019 AlphaWrite access issues. Rocket Math login."},{"parent":"Crystal Delatore","students":"June (cancelled), Everett (active)","start":"2025-08-25","cancel":"2025-12-19","convos":0,"classification":"preventable","category":"Silent","summary":"Partial churn. Zero conversations. Silent exit for June while Everett stayed."},{"parent":"Charles Lubbat","students":"Elizabeth & Madeline Lubbat","start":"2025-10-27","cancel":"2025-12-11","convos":1,"classification":"preventable","category":"Silent","summary":"2 kids, only 1 Alphie bot conversation. Silent exit."},{"parent":"Jessica Goldman","students":"Gabriella & Juliette Goldman","start":"2025-10-13","cancel":"2025-12-02","convos":1,"classification":"preventable","category":"Technical Issues","summary":"Birth year wrong in MAP testing system. Minimal other contact."},{"parent":"Cheryl Kitchener","students":"Indiana & Zalia Kitchener","start":"2025-09-15","cancel":"2025-12-08","convos":2,"classification":"preventable","category":"Engagement","summary":"Australian family. \u2018My children are just not logging in.\u2019 Sent same cancellation message twice."},{"parent":"Riz Jamal","students":"Owen (cancelled), Ella (active)","start":"2025-12-08","cancel":"2025-12-15","convos":3,"classification":"preventable","category":"Engagement","summary":"Partial churn. Owen cancelled after 7 days. Ella stayed. Straightforward cancellation request."},{"parent":"Alydia Grimm","students":"Quigley Grimm","start":"2025-11-10","cancel":"2025-12-11","convos":7,"classification":"preventable","category":"Technical Issues","summary":"4 Alphie bot convos. David clarified bracketing Day 1. Duplicate ClassBank accounts."},{"parent":"Na Wang","students":"Natalie Liu","start":"2025-10-13","cancel":"2025-12-01","convos":8,"classification":"preventable","category":"Process Failure","summary":"International (China). Payment processed AFTER cancellation twice. Asked to delete credit card. Login failures. Time zone issues."},{"parent":"Luke Gittemeier","students":"Quinn & Paul Gittemeier","start":"2025-10-27","cancel":"2025-11-28","convos":13,"classification":"preventable","category":"Technical Issues","summary":"\u2018We are out.\u2019 31 days. IXL lessons REPEATEDLY not updating. StudyReel broken. Login errors Day 1. Joe forwarded escalations."},{"parent":"George Berar","students":"Eric (cancelled), Sophia (enrolling)","start":"2025-09-15","cancel":"2025-12-15","convos":2,"classification":"preventable","category":"Value/Fit","summary":"\u2018A little more work than I thought, they require our help with laptops.\u2019 2nd child never started."},{"parent":"Peter Estrada","students":"Peter Estrada Jr","start":"2025-09-22","cancel":"2025-12-18","convos":17,"classification":"preventable","category":"Technical Issues","summary":"Highly engaged. Parent Dash login failures twice, science/math not updating, IXL issues, AlphaWrite login, ClassBank gift card delayed."},{"parent":"Danny Aqua","students":"Ethan Aqua","start":"2025-06-30","cancel":"2025-11-13","convos":0,"classification":"preventable","category":"Silent","summary":"136 days, zero conversations. Complete ghost."},{"parent":"Dominique Boles","students":"Jace & Jalen Boles","start":"2025-09-15","cancel":"2025-11-20","convos":2,"classification":"preventable","category":"Special Needs","summary":"Jalen has a diagnosis needing text-to-speech. Mary escalated to academics but conversation closed with no follow-up. Searched \u2018cancel\u2019 in help center 2 months later."},{"parent":"Sarah Miller","students":"Elani & Imara Maheswaran","start":"2025-09-15","cancel":"2025-11-20","convos":3,"classification":"preventable","category":"Value/Fit","summary":"Most articulate feedback: triple testing burden, AA can\u2019t replicate in-person \u2018magic\u2019, unschooled kids experienced AA as LESS freedom. Toured Alpha School Austin, loved it."},{"parent":"Loren Jacobs","students":"Colt Jacobs","start":"2025-10-13","cancel":"2025-11-25","convos":7,"classification":"preventable","category":"Value/Fit","summary":"\u2018I can\u2019t justify paying 10x for a more cumbersome system.\u2019 Son went from excitement to resentment in 2 weeks. Coaching best part but not enough. Mary refunded $510."},{"parent":"Melissa Lamebull Ingram","students":"Jacoby Lamebull-Ingram","start":"2025-10-13","cancel":"2025-11-25","convos":10,"classification":"involuntary","category":"Life Event","summary":"\u2018Unforeseen job change.\u2019 But still had: no parent Dash pre-launch, desktop incompatible with StudyReel, bracketing routed to wrong subject."},{"parent":"Siobhan Lee","students":"Illia Atterbury","start":"2025-09-15","cancel":"2025-11-20","convos":9,"classification":"preventable","category":"Technical Issues","summary":"Bought Chromebook specifically for Alpha. StudyReel doesn\u2019t work on Chromebook. Reading test glitched. Zearn wrong passwords. 9 convos of friction."},{"parent":"Michael Bonen","students":"Bryce Bonen","start":"2025-10-13","cancel":"2025-11-20","convos":2,"classification":"preventable","category":"Engagement","summary":"Minimal. Cancel/hold via Krys. Clean exit."},{"parent":"Mailyn Chico","students":"Arielle Chico, Asher (never started)","start":"2025-09-15","cancel":"2025-11-20","convos":1,"classification":"preventable","category":"Value/Fit","summary":"Found alternative. 2nd child never started."},{"parent":"Brittany Kline","students":"Jagger Kline","start":"2025-09-15","cancel":"2025-11-20","convos":0,"classification":"preventable","category":"Silent","summary":"Zero conversations. Complete ghost."},{"parent":"Patricia Morales","students":"Aiden Nethercott","start":"2025-10-01","cancel":"2025-11-20","convos":3,"classification":"preventable","category":"Process Failure","summary":"Internal flag from Turker: \u2018Did this cancellation fall through the cracks?\u2019 Another lost cancellation."},{"parent":"Kalyn Rodriguez","students":"Woodson Heidenfelder","start":"2025-09-15","cancel":"2025-11-17","convos":6,"classification":"preventable","category":"Value/Fit","summary":"\u2018Dash skill plans almost entirely reliant on IXL.\u2019 Daily glitches. AlphaLearn never launched as promised. \u2018Expensive IXL wrapper\u2019 value perception."},{"parent":"Summer Freedman","students":"Piper Freedman, Nova (never started)","start":"2025-10-27","cancel":"2025-11-13","convos":7,"classification":"preventable","category":"Technical Issues","summary":"17 days. Portal broken, told at live Q&A it\u2019d be fixed, still wasn\u2019t. MAP not showing. 2nd child never started."},{"parent":"Keryn Gold","students":"Warren Meyer","start":"2025-10-01","cancel":"2025-11-13","convos":4,"classification":"preventable","category":"Technical Issues","summary":"Alpha Read 404 errors. Alphas not posting to ClassBank. StudyReel not syncing scores."},{"parent":"Nicole Ramsay","students":"Julian Ramsay","start":"2025-10-13","cancel":"2025-11-13","convos":4,"classification":"preventable","category":"Engagement","summary":"Process of cancellation inquiry. Missing meeting link."},{"parent":"Colleen Tsikira","students":"Zoe & Ethan Tsikira","start":"2025-09-15","cancel":"2025-11-13","convos":7,"classification":"preventable","category":"Technical Issues","summary":"Withdrew Zoe first, kept Ethan, but apps kept failing. Chromebook incompatible. Head of Academics intervened. Requested reimbursement. Ethan payment_defaulted."},{"parent":"Jennifer DeFlorio","students":"Leonardo DeFlorio","start":"2025-10-13","cancel":"2025-11-12","convos":7,"classification":"preventable","category":"Technical Issues","summary":"\u2018Nobody on onboarding call that was supposed to begin at 10:30.\u2019 Edulastic broken. Bracketing not working. Devastating first impression."},{"parent":"Eric Bjurstrom","students":"Asher Bjurstrom","start":"2025-09-15","cancel":"2025-11-06","convos":2,"classification":"preventable","category":"Process Failure","summary":"\u2018Requested by email and chat support the termination of account and refund but have had no response.\u2019 Lost cancellation."},{"parent":"Leah Brunton","students":"Vivienne & Emmersen Brunton","start":"2025-10-13","cancel":"2025-11-06","convos":7,"classification":"preventable","category":"Technical Issues","summary":"24 days. Couldn\u2019t access daughters\u2019 Dash (kept logging into parent). Preferred name glitch. Never really got started."},{"parent":"Kamisha Corbitt","students":"Jayce & Kylee Corbitt","start":"2025-10-13","cancel":"2025-11-06","convos":6,"classification":"preventable","category":"Technical Issues","summary":"ESA family. \u2018Total disaster trying to get them started. My children and I were very excited.\u2019 First-week failure. ESA refund requested."},{"parent":"Monica Cox","students":"Eero Cox","start":"2025-10-01","cancel":"2025-11-06","convos":1,"classification":"preventable","category":"Value/Fit","summary":"\u2018We believe in the ethos but the way Eero learns isn\u2019t the best fit.\u2019 Clean exit."},{"parent":"Paula Tellez","students":"Tomas Dasilva","start":"2025-10-01","cancel":"2025-11-06","convos":8,"classification":"preventable","category":"Technical Issues","summary":"\u2018I feel more like a QA tester than a parent using a tool I\u2019m paying for.\u2019 StudyReel not opening. Lessons not recorded."},{"parent":"Susan Krick","students":"Lilly Krick","start":"2025-09-15","cancel":"2025-11-06","convos":6,"classification":"preventable","category":"Process Failure","summary":"\u2018Full of tears and struggles.\u2019 Tried multiple times to cancel, no response. Kept getting billed: \u2018Can you please stop trying to bill me?\u2019"},{"parent":"Carey Martin","students":"Willa Martin","start":"2025-09-15","cancel":"2025-11-06","convos":20,"classification":"preventable","category":"Technical Issues","summary":"Extremely engaged. Reading stuck for a week. Started positive, ground down by cumulative issues. Charged after cancellation."},{"parent":"Hanna Richards","students":"Elijah Richards","start":"2025-09-15","cancel":"2025-11-06","convos":6,"classification":"preventable","category":"Technical Issues","summary":"Beta tester. No lessons after placement tests. Refund vs $1000 credit issue."},{"parent":"Lauren Bean","students":"Mikko Bean, Tyson (never started)","start":"2025-09-15","cancel":"2025-10-05","convos":7,"classification":"preventable","category":"Technical Issues","summary":"20 days. Son scored 4 grades behind in math. Reading stuck. Replied \u2018stop\u2019 to weekly pulse. IXL data transfer needed."},{"parent":"Channi Fett","students":"Warren (cancelled), Gavin & Oaklen (active)","start":"2025-09-15","cancel":"2025-10-05","convos":1,"classification":"involuntary","category":"Life Event","summary":"Partial churn: Warren returned to traditional school. Siblings continued. Not a platform issue."},{"parent":"Toni Weinbrandt","students":"Lux Weinbrandt","start":"2025-09-15","cancel":"","convos":17,"classification":"involuntary","category":"Special Needs","summary":"PDA profile needing flexibility. Beta family. Child model (work permit needed). Now inquiring about RE-ENROLLMENT March 2026. Boomerang."},{"parent":"Brittany Canfield","students":"David Canfield","start":"2025-08-11","cancel":"2025-09-22","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. Zero conversations. 42 days."},{"parent":"Tiffany McWaters","students":"Mayli McWaters","start":"2025-07-21","cancel":"2025-09-15","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. Zero conversations."},{"parent":"Sarah Mabe","students":"Bennett Mabe","start":"2025-08-04","cancel":"2025-09-05","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. Zero conversations. 32 days."},{"parent":"Jonathan Doyle","students":"Sonia Doyle","start":"2025-10-01","cancel":"2025-09-01","convos":0,"classification":"preventable","category":"Silent","summary":"Cancel date before start date. Likely data issue or pre-start cancellation."},{"parent":"Chanel Smith","students":"Kameron & Torrey Smith","start":"2025-06-30","cancel":"2025-09-01","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. Zero conversations."},{"parent":"Rhonda Wallace","students":"Jayden Wallace","start":"2025-06-16","cancel":"2025-09-01","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. Zero conversations."},{"parent":"Jessica Ries","students":"Julia & Nicholas Ries","start":"2025-06-16","cancel":"2025-08-25","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. Zero conversations. 70 days."},{"parent":"Laura Strangio","students":"Joseph & Juliana Strangio","start":"2025-06-09","cancel":"2025-08-04","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. Zero conversations. 56 days."},{"parent":"Hope Smith","students":"Legend Smith","start":"2025-10-01","cancel":"2025-08-01","convos":0,"classification":"involuntary","category":"Life Event","summary":"Cancel date before start date. Data anomaly. Pre-start withdrawal."},{"parent":"Praveen Patel","students":"Nehvin Patel","start":"2025-06-09","cancel":"2025-06-28","convos":0,"classification":"preventable","category":"Silent","summary":"Pre-Intercom. 19 days. Fastest exit in dataset."}];
+
+const ATTRITION_COLORS = {
+  preventable: { color: C.red, bg: "#FEE2E2", label: "Preventable" },
+  involuntary: { color: C.green, bg: "#DCFCE7", label: "Involuntary" },
+  transfer: { color: C.purple, bg: "#EDE9FE", label: "Transfer" },
+};
+
+const CATEGORY_CHART_DATA = [
+  { name: "Technical Issues", value: 41 },
+  { name: "Engagement", value: 20 },
+  { name: "Silent", value: 14 },
+  { name: "Value/Fit", value: 12 },
+  { name: "Process Failure", value: 11 },
+  { name: "Life Event", value: 11 },
+  { name: "Special Needs", value: 3 },
+  { name: "Advanced Student", value: 2 },
+  { name: "Seasonal Pause", value: 2 },
+  { name: "Coach Departure", value: 1 },
+  { name: "Internal/Test", value: 1 },
+];
+
+const NET_CHURN_DATA = [
+  { month: "Aug '25", enrolled: 35, cancelled: 6 },
+  { month: "Sep '25", enrolled: 114, cancelled: 8 },
+  { month: "Oct '25", enrolled: 115, cancelled: 2 },
+  { month: "Nov '25", enrolled: 47, cancelled: 30 },
+  { month: "Dec '25", enrolled: 81, cancelled: 19 },
+  { month: "Jan '26", enrolled: 121, cancelled: 23 },
+  { month: "Feb '26", enrolled: 57, cancelled: 11 },
+  { month: "Mar '26", enrolled: 154, cancelled: 28 },
+  { month: "Apr '26", enrolled: 20, cancelled: 18 },
+];
+
+const COHORT_CHURN_DATA = [
+  { cohort: "Sep '25", rate: 42.1, students: 114, color: C.red },
+  { cohort: "Oct '25", rate: 39.1, students: 115, color: C.red },
+  { cohort: "Nov '25", rate: 23.4, students: 47, color: C.yellow },
+  { cohort: "Dec '25", rate: 22.2, students: 81, color: C.yellow },
+  { cohort: "Jan '26", rate: 9.9, students: 121, color: C.green },
+  { cohort: "Feb '26", rate: 5.3, students: 57, color: C.green },
+  { cohort: "Mar '26", rate: 1.3, students: 154, color: C.green },
+];
+
+const RETENTION_DATA = [
+  { cohort: "2025-09", vals: [100.0, 98.2, 93.9, 84.2, 76.3, 68.4, 64.0] },
+  { cohort: "2025-10", vals: [98.3, 93.9, 80.0, 74.8, 69.6, 67.0, 62.6] },
+  { cohort: "2025-11", vals: [100.0, 100.0, 93.6, 87.2, 78.7, 76.6, 76.6] },
+  { cohort: "2025-12", vals: [100.0, 98.8, 92.6, 81.5, 80.2, 80.2, 80.2] },
+  { cohort: "2026-01", vals: [100.0, 100.0, 95.0, 90.9, 90.9, 90.9, 90.9] },
+  { cohort: "2026-02", vals: [100.0, 94.7, 94.7, 94.7, 94.7, 94.7, 94.7] },
+  { cohort: "2026-03", vals: [100.0, 98.7, 98.7, 98.7, 98.7, 98.7, 98.7] },
+];
+
+const TENURE_DATA = [
+  { month: "Month 0", cancellations: 14, danger: true },
+  { month: "Month 1", cancellations: 39, danger: true },
+  { month: "Month 2", cancellations: 39, danger: true },
+  { month: "Month 3", cancellations: 20, danger: false },
+  { month: "Month 4", cancellations: 16, danger: false },
+  { month: "Month 5", cancellations: 10, danger: false },
+  { month: "Month 6", cancellations: 1, danger: false },
+];
+
+function AttritionTab() {
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filtered = ATTRITION_PROFILES.filter(p => {
+    if (filter !== "all" && p.classification !== filter) return false;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      return p.parent.toLowerCase().includes(q) || p.students.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const counts = { all: ATTRITION_PROFILES.length, preventable: 101, involuntary: 15, transfer: 2 };
+
+  const retentionColor = v => {
+    if (v >= 90) return { bg: "rgba(34,197,94,0.12)", color: C.green };
+    if (v >= 75) return { bg: "rgba(34,197,94,0.07)", color: C.greenDark };
+    if (v >= 65) return { bg: "rgba(245,158,11,0.10)", color: C.yellow };
+    return { bg: "rgba(239,68,68,0.10)", color: C.red };
+  };
+
+  return (
+    <>
+      {/* KPIs */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16, marginBottom: 32 }}>
+        {[
+          { num: "118", label: "Cancelled Families", color: C.red, bg: "#FEF2F2" },
+          { num: "495", label: "Active Students", color: C.green, bg: "#F0FDF4" },
+          { num: "101", label: "Preventable", color: C.yellow, bg: "#FFFBEB" },
+          { num: "15", label: "Involuntary", color: C.blue, bg: "#EFF6FF" },
+          { num: "2", label: "Transfers", color: C.purple, bg: "#F5F3FF" },
+        ].map(k => (
+          <div key={k.label} style={{ background: k.bg, borderRadius: 14, padding: "20px 16px", textAlign: "center", border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: k.color, letterSpacing: -1 }}>{k.num}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: C.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>{k.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Section 1: Classification */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 16 }}>Classification: Preventable vs Involuntary vs Transfer</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 36 }}>
+        <Card>
+          <ResponsiveContainer width="100%" height={260}>
+            <PieChart>
+              <Pie data={[{ name: "Preventable", value: 101 }, { name: "Involuntary", value: 15 }, { name: "Transfer", value: 2 }]} cx="50%" cy="50%" innerRadius={55} outerRadius={100} dataKey="value" stroke="none">
+                <Cell fill={C.red} />
+                <Cell fill={C.green} />
+                <Cell fill={C.purple} />
+              </Pie>
+              <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 12 }} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div style={{ display: "flex", justifyContent: "center", gap: 20, marginTop: 8 }}>
+            {[["Preventable", C.red], ["Involuntary", C.green], ["Transfer", C.purple]].map(([l, c]) => (
+              <div key={l} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: C.textMid }}>
+                <div style={{ width: 10, height: 10, borderRadius: 3, background: c }} />
+                {l}
+              </div>
+            ))}
+          </div>
+        </Card>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {[
+            { title: "Preventable (101 families)", desc: "Could have been retained with better platform reliability, onboarding, or process. This is the addressable pool.", color: C.red, bg: "#FEF2F2" },
+            { title: "Involuntary (15 families)", desc: "Life events, relocations, job changes, health, seasonal pauses. Not preventable by product or CX changes.", color: C.green, bg: "#F0FDF4" },
+            { title: "Transfers (2 families)", desc: "Moved to GT Anywhere or Alpha School. Positive for the ecosystem but lost from AA revenue.", color: C.purple, bg: "#F5F3FF" },
+          ].map(c => (
+            <div key={c.title} style={{ background: c.bg, borderLeft: `3px solid ${c.color}`, borderRadius: "0 10px 10px 0", padding: "14px 18px" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 4 }}>{c.title}</div>
+              <div style={{ fontSize: 12, color: C.textMid, lineHeight: 1.5 }}>{c.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Section 2: Net Churn */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 16 }}>Net Churn: Enrollments vs Cancellations by Month</div>
+      <Card>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={NET_CHURN_DATA} barGap={2}>
+            <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+            <XAxis dataKey="month" tick={{ fill: C.textMid, fontSize: 11 }} axisLine={{ stroke: C.border }} />
+            <YAxis tick={{ fill: C.textMid, fontSize: 11 }} axisLine={{ stroke: C.border }} />
+            <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 12 }} />
+            <Bar dataKey="enrolled" name="Enrolled" fill={C.green} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="cancelled" name="Cancelled" fill={C.red} radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+        <div style={{ fontSize: 12, color: C.textMid, marginTop: 12, lineHeight: 1.5 }}>
+          Enrollment is scaling strongly. November 2025 was the first month where cancellations became material (30 students). The net has been positive every month.
+        </div>
+      </Card>
+
+      {/* Section 3: Cohort Churn Rate */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 16, marginTop: 32 }}>Cohort Churn Rate by Enrollment Month</div>
+      <Card>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={COHORT_CHURN_DATA}>
+            <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+            <XAxis dataKey="cohort" tick={{ fill: C.textMid, fontSize: 11 }} axisLine={{ stroke: C.border }} />
+            <YAxis tick={{ fill: C.textMid, fontSize: 11 }} tickFormatter={v => v + "%"} axisLine={{ stroke: C.border }} />
+            <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 12 }} formatter={(v, _, p) => [`${v}% (${p.payload.students} students)`, "Churn Rate"]} />
+            <Bar dataKey="rate" name="Churn Rate" radius={[4, 4, 0, 0]}>
+              {COHORT_CHURN_DATA.map((d, i) => <Cell key={i} fill={d.color} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+        <div style={{ fontSize: 12, color: C.textMid, marginTop: 12, lineHeight: 1.5 }}>
+          Sep/Oct 2025 cohorts have the highest churn (~37-42%). These were the first scaling cohorts hitting beta-era platform issues. Jan 2026+ cohorts show dramatically lower churn (5-10%), indicating product stability improvements.
+        </div>
+      </Card>
+
+      {/* Section 4: Top Categories */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 16, marginTop: 32 }}>Top Churn Categories</div>
+      <Card>
+        <ResponsiveContainer width="100%" height={340}>
+          <BarChart data={CATEGORY_CHART_DATA} layout="vertical">
+            <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+            <XAxis type="number" tick={{ fill: C.textMid, fontSize: 11 }} axisLine={{ stroke: C.border }} />
+            <YAxis type="category" dataKey="name" tick={{ fill: C.textMid, fontSize: 11 }} width={120} axisLine={{ stroke: C.border }} />
+            <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 12 }} />
+            <Bar dataKey="value" name="Families" fill={C.purple} radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      {/* Section 5: Cohort Retention Heatmap */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 16, marginTop: 32 }}>Cohort Retention</div>
+      <Card>
+        <div style={{ fontSize: 12, color: C.textMid, marginBottom: 16 }}>What percentage of each enrollment cohort survives to Month N?</div>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <thead>
+              <tr>
+                {["Cohort", "Start", "M1", "M2", "M3", "M4", "M5", "M6"].map(h => (
+                  <th key={h} style={{ padding: "10px 14px", textAlign: "center", borderBottom: `2px solid ${C.border}`, color: C.textMid, fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {RETENTION_DATA.map(row => (
+                <tr key={row.cohort}>
+                  <td style={{ padding: "10px 14px", fontWeight: 700, color: C.text, borderBottom: `1px solid ${C.borderLight}` }}>{row.cohort}</td>
+                  {row.vals.map((v, i) => {
+                    const rc = retentionColor(v);
+                    return (
+                      <td key={i} style={{ padding: "10px 14px", textAlign: "center", fontWeight: 600, color: rc.color, background: rc.bg, borderBottom: `1px solid ${C.borderLight}` }}>{v.toFixed(1)}%</td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ fontSize: 11, color: C.textLight, marginTop: 12 }}>
+          Cohorts with fewer than 5 students excluded. M0 = survived to day 0 (enrolled), M1 = survived 30+ days, etc.
+        </div>
+      </Card>
+
+      {/* Section 6: When Attrition Peaks */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 16, marginTop: 32 }}>When Attrition Peaks</div>
+      <Card>
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={TENURE_DATA}>
+            <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+            <XAxis dataKey="month" tick={{ fill: C.textMid, fontSize: 11 }} axisLine={{ stroke: C.border }} />
+            <YAxis tick={{ fill: C.textMid, fontSize: 11 }} axisLine={{ stroke: C.border }} />
+            <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 12 }} />
+            <Bar dataKey="cancellations" name="Cancellations" radius={[4, 4, 0, 0]}>
+              {TENURE_DATA.map((d, i) => <Cell key={i} fill={d.danger ? C.red : C.purple} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+        <div style={{ fontSize: 12, color: C.textMid, marginTop: 12, lineHeight: 1.5 }}>
+          The danger zone is Months 1-2 (days 30-89). Together they account for 78 of 139 cancellations (56%). Month 0 (first 30 days) accounts for 14 more. After Month 3, attrition drops sharply. Families who survive 90 days are likely to stay.
+        </div>
+      </Card>
+
+      {/* Section 7: Family Records */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 12, marginTop: 32 }}>Full Family Records</div>
+      <div style={{ fontSize: 12, color: C.textMid, marginBottom: 16 }}>Every cancelled family with a summary of why they left.</div>
+
+      {/* Filters + Search */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 16 }}>
+        {["all", "preventable", "involuntary", "transfer"].map(f => {
+          const active = filter === f;
+          const label = f === "all" ? `All (${counts.all})` : `${ATTRITION_COLORS[f]?.label || f} (${counts[f]})`;
+          return (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding: "6px 16px", borderRadius: 99, fontSize: 12, fontWeight: 600,
+              cursor: "pointer", border: active ? "none" : `1px solid ${C.border}`,
+              background: active ? C.blue : C.white,
+              color: active ? "#FFF" : C.textMid,
+              transition: "all 0.15s ease",
+            }}>{label}</button>
+          );
+        })}
+        <div style={{ flex: 1 }} />
+        <input
+          type="text" placeholder="Search families..."
+          value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+          style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.text, background: C.white, width: 200, outline: "none" }}
+        />
+      </div>
+
+      {/* Family cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {filtered.map((p, i) => {
+          const tenure = p.start && p.cancel ? Math.round((new Date(p.cancel) - new Date(p.start)) / 86400000) : null;
+          const tenureStr = tenure !== null && tenure >= 0 ? tenure + "d" : "N/A";
+          const cls = ATTRITION_COLORS[p.classification] || ATTRITION_COLORS.preventable;
+          return (
+            <div key={i} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 18px", transition: "border-color 0.15s" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: C.text }}>{p.parent}</span>
+                  <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.3, background: cls.bg, color: cls.color }}>{p.classification}</span>
+                  <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: 99, fontSize: 10, fontWeight: 600, background: "#EFF6FF", color: C.blue }}>{p.category}</span>
+                </div>
+                <div style={{ display: "flex", gap: 16, fontSize: 11, color: C.textLight }}>
+                  <span>{p.students}</span>
+                  <span>{tenureStr}</span>
+                  <span>{p.convos} convos</span>
+                </div>
+              </div>
+              <div style={{ fontSize: 12, color: C.textMid, marginTop: 8, lineHeight: 1.5 }}>{p.summary}</div>
+            </div>
+          );
+        })}
+      </div>
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: 40, color: C.textLight, fontSize: 13 }}>No families match the current filters.</div>
+      )}
+    </>
+  );
+}
+
 // ═══ MAIN DASHBOARD ═══
 
 export default function Dashboard() {
@@ -1100,16 +1406,18 @@ export default function Dashboard() {
           borderBottom: `1px solid ${C.border}`,
         }}>
           {/* Row 1: Title + Inbox */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tab === "insights" ? 0 : 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: (tab === "insights" || tab === "attrition") ? 0 : 12 }}>
             <div>
               <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0, letterSpacing: -0.5 }}>{tabLabel}</h1>
               <div style={{ fontSize: 12, color: C.textLight, marginTop: 2 }}>
-                {isFiltered
-                  ? `Showing ${data.filteredConvos.length} filtered conversations`
-                  : `${data.totalConversations} conversations across ${data.weekCount} week${data.weekCount !== 1 ? "s" : ""}`}
+                {tab === "attrition"
+                  ? "118 cancelled families · Intercom conversation analysis & enrollment CSV"
+                  : isFiltered
+                    ? `Showing ${data.filteredConvos.length} filtered conversations`
+                    : `${data.totalConversations} conversations across ${data.weekCount} week${data.weekCount !== 1 ? "s" : ""}`}
               </div>
             </div>
-            {tab !== "insights" && data.inboxOptions.length > 1 && (
+            {tab !== "insights" && tab !== "attrition" && data.inboxOptions.length > 1 && (
               <select
                 value={inboxFilter}
                 onChange={e => setInboxFilter(e.target.value)}
@@ -1127,7 +1435,7 @@ export default function Dashboard() {
             )}
           </div>
           {/* Row 2: Week presets + date range (hidden on Insights tab) */}
-          {tab !== "insights" && <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          {tab !== "insights" && tab !== "attrition" && <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: C.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginRight: 2 }}>Week:</span>
             {data.weekly.length > 0 && data.weekly.map(w => {
               const weekDates = (() => {
@@ -1191,6 +1499,7 @@ export default function Dashboard() {
             {tab === "categories" && <CategoriesTab data={data} weekly={data.weekly} TOP4={TOP4} />}
             {tab === "volume" && <VolumeTab data={data} avgWeeklyVol={avgWeeklyVol} volRtData={volRtData} />}
             {tab === "team" && <TeamTab data={data} />}
+            {tab === "attrition" && <AttritionTab />}
           </div>
         </main>
       </div>
