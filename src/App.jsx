@@ -471,21 +471,33 @@ function InsightCard({ insight, defaultExpanded = false }) {
 function CollapsibleSection({ title, count, defaultOpen = false, icon, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <Card style={{ overflow: "hidden", padding: 0 }}>
+    <div style={{
+      overflow: "hidden", borderRadius: 16,
+      background: C.white,
+      border: `1px solid ${open ? C.border : C.borderLight}`,
+      boxShadow: open ? "0 4px 16px rgba(15,23,42,0.06)" : "0 1px 3px rgba(15,23,42,0.04)",
+      transition: "all 0.2s ease",
+    }}>
       <div onClick={() => setOpen(!open)} style={{
-        padding: "16px 22px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
-        background: open ? C.borderLight : C.white, transition: "background 0.15s ease",
-        userSelect: "none",
+        padding: "18px 24px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+        background: C.white, transition: "all 0.15s ease",
+        userSelect: "none", borderBottom: open ? `1px solid ${C.borderLight}` : "1px solid transparent",
       }}>
-        {icon && <span style={{ fontSize: 16, opacity: 0.5 }}>{icon}</span>}
-        <span style={{ fontSize: 15, fontWeight: 700, color: C.text, flex: 1 }}>{title}</span>
+        {icon && <span style={{ fontSize: 15 }}>{icon}</span>}
+        <span style={{ fontSize: 14, fontWeight: 700, color: C.text, flex: 1, letterSpacing: -0.2 }}>{title}</span>
         {count != null && (
-          <span style={{ fontSize: 11, fontWeight: 700, color: C.textLight, background: C.borderLight, borderRadius: 6, padding: "2px 8px" }}>{count}</span>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: C.blue, background: "#EFF6FF",
+            borderRadius: 20, padding: "3px 10px", lineHeight: 1,
+          }}>{count}</span>
         )}
-        <span style={{ fontSize: 12, color: C.textLight, transition: "transform 0.15s ease", transform: open ? "rotate(90deg)" : "none" }}>▸</span>
+        <span style={{
+          fontSize: 11, color: C.textLight, transition: "transform 0.2s ease",
+          transform: open ? "rotate(90deg)" : "none", opacity: 0.5,
+        }}>▸</span>
       </div>
-      {open && <div style={{ padding: "4px 22px 22px" }}>{children}</div>}
-    </Card>
+      {open && <div style={{ padding: "16px 24px 24px" }}>{children}</div>}
+    </div>
   );
 }
 
@@ -494,31 +506,38 @@ function SignalCard({ signal }) {
   const sev = SEV[signal.severity] || SEV.info;
   return (
     <div style={{
-      background: C.white, border: `1px solid ${sev.border}`, borderLeft: `4px solid ${sev.accent}`,
-      borderRadius: 12, overflow: "hidden",
+      background: `linear-gradient(135deg, ${C.white} 0%, ${sev.bg} 100%)`,
+      border: `1px solid ${sev.border}`, borderLeft: `3px solid ${sev.accent}`,
+      borderRadius: 14, overflow: "hidden",
+      transition: "box-shadow 0.2s ease",
+      boxShadow: "0 1px 4px rgba(15,23,42,0.04)",
     }}>
-      <div style={{ padding: "16px 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+      <div style={{ padding: "18px 22px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <Badge label={signal.severity} color={sev.badgeText} bg={sev.badge} />
-          <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{signal.title}</span>
         </div>
-        <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.7 }}>{signal.body}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 8, lineHeight: 1.4, letterSpacing: -0.2 }}>{signal.title}</div>
+        <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.75 }}>{signal.body}</div>
         {signal.so_what && (
           <div
             onClick={() => setShowDetail(!showDetail)}
             style={{
-              marginTop: 10, cursor: "pointer", fontSize: 12, fontWeight: 600,
-              color: sev.accent, display: "flex", alignItems: "center", gap: 4,
+              marginTop: 14, cursor: "pointer", fontSize: 12, fontWeight: 700,
+              color: sev.accent, display: "inline-flex", alignItems: "center", gap: 5,
+              padding: "6px 12px", borderRadius: 8,
+              background: showDetail ? sev.bg : "transparent",
+              border: `1px solid ${showDetail ? sev.border : "transparent"}`,
+              transition: "all 0.15s ease",
             }}
           >
-            <span style={{ transform: showDetail ? "rotate(90deg)" : "none", transition: "transform 0.15s ease", display: "inline-block" }}>▸</span>
+            <span style={{ transform: showDetail ? "rotate(90deg)" : "none", transition: "transform 0.15s ease", display: "inline-block", fontSize: 10 }}>▸</span>
             So what?
           </div>
         )}
         {showDetail && signal.so_what && (
           <div style={{
-            marginTop: 8, padding: "12px 16px", background: sev.bg, borderRadius: 8,
-            fontSize: 13, color: C.text, lineHeight: 1.7, borderLeft: `3px solid ${sev.accent}`,
+            marginTop: 10, padding: "14px 18px", background: C.white, borderRadius: 10,
+            fontSize: 13, color: C.text, lineHeight: 1.75, border: `1px solid ${sev.border}`,
           }}>{signal.so_what}</div>
         )}
       </div>
@@ -529,20 +548,26 @@ function SignalCard({ signal }) {
 function FrictionRow({ family, contacts, summary }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden" }}>
+    <div style={{
+      border: `1px solid ${open ? "#FECACA" : C.borderLight}`, borderRadius: 12, overflow: "hidden",
+      transition: "all 0.15s ease", background: C.white,
+    }}>
       <div onClick={() => setOpen(!open)} style={{
-        padding: "12px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
-        background: open ? "#FEF2F2" : C.white, transition: "background 0.15s ease",
+        padding: "13px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+        transition: "background 0.15s ease",
       }}>
         <span style={{
-          fontSize: 11, fontWeight: 800, color: "#DC2626", background: "#FEE2E2",
-          borderRadius: 6, padding: "2px 8px", minWidth: 24, textAlign: "center",
+          fontSize: 11, fontWeight: 800, color: "#DC2626", background: "#FEF2F2",
+          borderRadius: 20, padding: "3px 10px", minWidth: 28, textAlign: "center", lineHeight: 1,
         }}>{contacts}x</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: C.text, flex: 1 }}>{family}</span>
-        <span style={{ fontSize: 12, color: C.textLight, transform: open ? "rotate(90deg)" : "none", transition: "transform 0.15s ease" }}>▸</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.text, flex: 1, letterSpacing: -0.1 }}>{family}</span>
+        <span style={{ fontSize: 10, color: C.textLight, transform: open ? "rotate(90deg)" : "none", transition: "transform 0.15s ease", opacity: 0.4 }}>▸</span>
       </div>
       {open && (
-        <div style={{ padding: "0 16px 14px", fontSize: 13, color: C.textMid, lineHeight: 1.7 }}>{summary}</div>
+        <div style={{
+          padding: "0 18px 16px", fontSize: 13, color: C.textMid, lineHeight: 1.75,
+          borderTop: `1px solid ${C.borderLight}`, marginTop: 0, paddingTop: 14,
+        }}>{summary}</div>
       )}
     </div>
   );
@@ -586,17 +611,17 @@ function InsightsTab({ data, weeklyReports = [] }) {
     <>
       {/* View toggle */}
       <div style={{
-        display: "flex", gap: 4, marginBottom: 24, marginTop: 8,
-        background: C.borderLight, borderRadius: 10, padding: 4, width: "fit-content",
+        display: "flex", gap: 4, marginBottom: 28, marginTop: 8,
+        background: C.borderLight, borderRadius: 12, padding: 4, width: "fit-content",
       }}>
         {[{ key: "weekly", label: "Weekly" }, { key: "monthly", label: "Monthly" }].map(v => (
           <button key={v.key} onClick={() => setView(v.key)} style={{
             border: "none", cursor: "pointer",
-            padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+            padding: "8px 22px", borderRadius: 9, fontSize: 13, fontWeight: 600,
             background: view === v.key ? C.white : "transparent",
             color: view === v.key ? C.navy : C.textLight,
-            boxShadow: view === v.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-            transition: "all 0.15s ease",
+            boxShadow: view === v.key ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
+            transition: "all 0.15s ease", letterSpacing: -0.1,
           }}>{v.label}</button>
         ))}
       </div>
@@ -605,22 +630,25 @@ function InsightsTab({ data, weeklyReports = [] }) {
         <>
           {/* Week selector pills */}
           {weekLabels.length > 0 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
               {weekLabels.map(wl => {
                 const hasReport = weeklyReports.some(r => r.week_label === wl);
+                const isSelected = selectedWeek === wl;
                 return (
                   <button key={wl} onClick={() => setSelectedWeek(wl)} style={{
-                    border: `1px solid ${selectedWeek === wl ? C.navy : C.border}`,
-                    background: selectedWeek === wl ? C.navy : C.white,
-                    color: selectedWeek === wl ? "white" : C.textMid,
-                    borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600,
+                    border: isSelected ? "none" : `1px solid ${C.borderLight}`,
+                    background: isSelected ? C.navy : C.white,
+                    color: isSelected ? "white" : C.textMid,
+                    borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 600,
                     cursor: "pointer", transition: "all 0.15s ease",
-                    position: "relative",
+                    position: "relative", letterSpacing: -0.1,
+                    boxShadow: isSelected ? "0 2px 10px rgba(10,22,40,0.2)" : "0 1px 3px rgba(0,0,0,0.04)",
                   }}>
-                    Week of {wl}
+                    Week of <span style={{ fontWeight: 700 }}>{wl}</span>
                     {hasReport && <span style={{
                       position: "absolute", top: -3, right: -3, width: 8, height: 8,
-                      borderRadius: "50%", background: C.green, border: `2px solid ${C.white}`,
+                      borderRadius: "50%", background: C.green, border: `2px solid ${isSelected ? C.navy : C.white}`,
+                      boxShadow: "0 1px 3px rgba(34,197,94,0.4)",
                     }} />}
                   </button>
                 );
@@ -630,33 +658,41 @@ function InsightsTab({ data, weeklyReports = [] }) {
 
           {/* Report content or empty state */}
           {report ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               {/* ── Executive Summary ── */}
-              <Card style={{
-                borderLeft: `4px solid ${C.blue}`,
-                background: `linear-gradient(135deg, ${C.white} 0%, #F8FAFC 100%)`,
+              <div style={{
+                borderRadius: 18, overflow: "hidden",
+                background: `linear-gradient(145deg, #0A1628 0%, #162037 50%, #1E293B 100%)`,
+                padding: "28px 28px 24px", color: "white",
+                boxShadow: "0 8px 32px rgba(10,22,40,0.25)",
               }}>
                 {report.week_type && (
-                  <div style={{ marginBottom: 12 }}>
-                    <Badge label={report.week_type} color={C.blue} bg="#DBEAFE" />
+                  <div style={{ marginBottom: 14 }}>
+                    <span style={{
+                      fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase",
+                      color: "#93C5FD", background: "rgba(59,130,246,0.15)",
+                      borderRadius: 6, padding: "4px 10px", border: "1px solid rgba(59,130,246,0.2)",
+                    }}>{report.week_type}</span>
                   </div>
                 )}
-                <div style={{ fontSize: 14, color: C.text, lineHeight: 1.8, marginBottom: 16 }}>
+                <div style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", lineHeight: 1.8, letterSpacing: -0.1 }}>
                   {report.exec_summary}
                 </div>
-                {/* Stat pills */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-                  {parseJSON(report.exec_stats).map((s, i) => (
-                    <div key={i} style={{
-                      background: C.white, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px",
-                    }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight, marginBottom: 4 }}>{s.label}</div>
-                      <div style={{ fontSize: 22, fontWeight: 800, color: C.navy, letterSpacing: -0.5 }}>{s.value}</div>
-                      {s.detail && <div style={{ fontSize: 11, color: C.textLight, marginTop: 3 }}>{s.detail}</div>}
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              </div>
+              {/* Stat grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+                {parseJSON(report.exec_stats).map((s, i) => (
+                  <div key={i} style={{
+                    background: C.white, border: `1px solid ${C.borderLight}`, borderRadius: 14, padding: "16px 18px",
+                    boxShadow: "0 1px 4px rgba(15,23,42,0.04)",
+                    transition: "box-shadow 0.15s ease",
+                  }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: C.textLight, marginBottom: 6 }}>{s.label}</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: C.navy, letterSpacing: -0.5, lineHeight: 1 }}>{s.value}</div>
+                    {s.detail && <div style={{ fontSize: 11, color: C.textLight, marginTop: 6, lineHeight: 1.4 }}>{s.detail}</div>}
+                  </div>
+                ))}
+              </div>
 
               {/* ── Signals ── */}
               {parseJSON(report.signals).length > 0 && (
@@ -670,15 +706,15 @@ function InsightsTab({ data, weeklyReports = [] }) {
               {/* ── Noise ── */}
               {parseJSON(report.noise).length > 0 && (
                 <CollapsibleSection title="Noise" count={parseJSON(report.noise).length} icon="〰">
-                  <div style={{ fontSize: 11, color: C.textLight, marginBottom: 10, marginTop: 4 }}>Volume that looks concerning but isn't. Don't overreact.</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ fontSize: 11, color: C.textLight, marginBottom: 12, marginTop: 2, fontStyle: "italic" }}>Volume that looks concerning but isn't.</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {parseJSON(report.noise).map((n, i) => (
                       <div key={i} style={{
-                        padding: "10px 14px", background: "#F8FAFC", borderRadius: 8,
+                        padding: "13px 18px", background: "#FAFBFC", borderRadius: 12,
                         border: `1px solid ${C.borderLight}`,
                       }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{n.title}</span>
-                        <span style={{ fontSize: 12, color: C.textLight, marginLeft: 8 }}>— {n.body}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{n.title}</span>
+                        <div style={{ fontSize: 12.5, color: C.textMid, marginTop: 4, lineHeight: 1.6 }}>{n.body}</div>
                       </div>
                     ))}
                   </div>
@@ -694,10 +730,15 @@ function InsightsTab({ data, weeklyReports = [] }) {
                 >
                   {parseJSON(report.friction_high).length > 0 && (
                     <>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 8, marginBottom: 8 }}>
+                      <div style={{
+                        fontSize: 11, fontWeight: 700, color: C.red, textTransform: "uppercase",
+                        letterSpacing: 0.8, marginTop: 4, marginBottom: 10,
+                        display: "flex", alignItems: "center", gap: 8,
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.red, display: "inline-block" }} />
                         High-Friction Families (3+ contacts)
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                         {parseJSON(report.friction_high).map((f, i) => (
                           <FrictionRow key={i} family={f.family} contacts={f.contacts} summary={f.summary} />
                         ))}
@@ -706,10 +747,15 @@ function InsightsTab({ data, weeklyReports = [] }) {
                   )}
                   {parseJSON(report.friction_repeats).length > 0 && (
                     <>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: C.orange, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+                      <div style={{
+                        fontSize: 11, fontWeight: 700, color: C.orange, textTransform: "uppercase",
+                        letterSpacing: 0.8, marginBottom: 10,
+                        display: "flex", alignItems: "center", gap: 8,
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.orange, display: "inline-block" }} />
                         Repeat Contacts (2x)
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                         {parseJSON(report.friction_repeats).map((f, i) => (
                           <FrictionRow key={i} family={f.family} contacts={f.contacts} summary={f.issue} />
                         ))}
@@ -718,17 +764,25 @@ function InsightsTab({ data, weeklyReports = [] }) {
                   )}
                   {parseJSON(report.friction_prospects).length > 0 && (
                     <>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: C.yellow, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+                      <div style={{
+                        fontSize: 11, fontWeight: 700, color: C.yellowDark, textTransform: "uppercase",
+                        letterSpacing: 0.8, marginBottom: 10,
+                        display: "flex", alignItems: "center", gap: 8,
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.yellow, display: "inline-block" }} />
                         Prospect Friction
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                         {parseJSON(report.friction_prospects).map((f, i) => (
                           <div key={i} style={{
-                            display: "flex", alignItems: "center", gap: 10, padding: "8px 14px",
-                            background: "#FFFBEB", borderRadius: 8, border: `1px solid #FDE68A`,
+                            display: "flex", alignItems: "center", gap: 12, padding: "10px 16px",
+                            background: "#FFFBEB", borderRadius: 10, border: `1px solid #FDE68A`,
                           }}>
-                            <span style={{ fontSize: 12, fontWeight: 800, color: C.yellowDark, minWidth: 24 }}>{f.count}x</span>
-                            <span style={{ fontSize: 13, color: C.text }}>{f.issue}</span>
+                            <span style={{
+                              fontSize: 11, fontWeight: 800, color: C.yellowDark,
+                              background: "#FEF3C7", borderRadius: 20, padding: "2px 10px", minWidth: 30, textAlign: "center",
+                            }}>{f.count}x</span>
+                            <span style={{ fontSize: 13, color: C.text, lineHeight: 1.5 }}>{f.issue}</span>
                           </div>
                         ))}
                       </div>
@@ -742,31 +796,32 @@ function InsightsTab({ data, weeklyReports = [] }) {
                 <CollapsibleSection title="Front Door Health" icon="🚪">
                   {/* Stats row */}
                   {parseJSON(report.front_door_stats).length > 0 && (
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8, marginBottom: 14 }}>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4, marginBottom: 16 }}>
                       {parseJSON(report.front_door_stats).map((s, i) => (
                         <div key={i} style={{
-                          background: "#EFF6FF", border: `1px solid #BFDBFE`, borderRadius: 8, padding: "8px 14px",
+                          background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
+                          border: `1px solid #BFDBFE`, borderRadius: 12, padding: "10px 16px",
                         }}>
-                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight }}>{s.label}</div>
-                          <div style={{ fontSize: 18, fontWeight: 800, color: C.navy }}>{s.value}</div>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: C.textLight }}>{s.label}</div>
+                          <div style={{ fontSize: 20, fontWeight: 800, color: C.navy, letterSpacing: -0.3 }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
                   )}
                   {/* Assessment */}
                   <div style={{
-                    padding: "14px 16px", background: "#F8FAFC", borderRadius: 10,
-                    border: `1px solid ${C.border}`, fontSize: 13, color: C.text, lineHeight: 1.7, marginBottom: 14,
+                    padding: "16px 20px", background: "#FAFBFC", borderRadius: 12,
+                    border: `1px solid ${C.borderLight}`, fontSize: 13, color: C.text, lineHeight: 1.75, marginBottom: 16,
                   }}>{report.front_door_assessment}</div>
                   {/* Friction points */}
                   {parseJSON(report.front_door_friction).length > 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       {parseJSON(report.front_door_friction).map((f, i) => (
                         <div key={i} style={{
-                          padding: "12px 16px", border: `1px solid ${C.border}`, borderRadius: 10,
+                          padding: "14px 18px", border: `1px solid ${C.borderLight}`, borderRadius: 12,
                         }}>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: C.navy, marginBottom: 4 }}>{f.category}</div>
-                          <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.6 }}>{f.details}</div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: C.navy, marginBottom: 5, letterSpacing: -0.1 }}>{f.category}</div>
+                          <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.7 }}>{f.details}</div>
                         </div>
                       ))}
                     </div>
@@ -777,14 +832,19 @@ function InsightsTab({ data, weeklyReports = [] }) {
               {/* ── Volume Note ── */}
               {report.volume_note && (
                 <CollapsibleSection title="Volume Note" icon="📊">
-                  <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.7, marginTop: 6 }}>{report.volume_note}</div>
+                  <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.75, marginTop: 4 }}>{report.volume_note}</div>
                   {parseJSON(report.channel_split).length > 0 && (
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
                       {parseJSON(report.channel_split).map((ch, i) => (
                         <div key={i} style={{
-                          padding: "6px 12px", background: C.borderLight, borderRadius: 8,
+                          padding: "7px 14px", background: "#F8FAFC", borderRadius: 10,
                           fontSize: 12, fontWeight: 600, color: C.textMid,
-                        }}>{ch.channel}: {ch.count} ({ch.pct}%)</div>
+                          border: `1px solid ${C.borderLight}`,
+                        }}>
+                          <span style={{ color: C.text, fontWeight: 700 }}>{ch.channel}</span>
+                          <span style={{ color: C.textLight, margin: "0 6px" }}>·</span>
+                          {ch.count} <span style={{ color: C.textLight }}>({ch.pct}%)</span>
+                        </div>
                       ))}
                     </div>
                   )}
