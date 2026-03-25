@@ -70,15 +70,17 @@ function useSupabase() {
   const [insights, setInsights] = useState([]);
   const [hourlyPatterns, setHourlyPatterns] = useState([]);
   const [conversations, setConversations] = useState([]);
+  const [weeklyReports, setWeeklyReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [ws, cat, ins, hp] = await Promise.all([
+      const [ws, cat, ins, hp, wr] = await Promise.all([
         supabase.from("weekly_stats").select("*").order("week_label"),
         supabase.from("categorizations").select("*"),
         supabase.from("weekly_insights").select("*").eq("status", "published"),
         supabase.from("hourly_patterns").select("*").order("hour_num"),
+        supabase.from("weekly_reports").select("*").eq("status", "published"),
       ]);
       // Fetch conversations — try with first_response_min, fall back without it
       let conv = await supabase.from("conversations").select("id,created_at,user_name,assigned_agent,state,subject,week_label,message_count,source_channel,first_response_min");
@@ -90,12 +92,13 @@ function useSupabase() {
       setInsights(ins.data || []);
       setHourlyPatterns(hp.data || []);
       setConversations(conv.data || []);
+      setWeeklyReports(wr.data || []);
       setLoading(false);
     }
     load();
   }, []);
 
-  return { weeklyStats, categorizations, insights, hourlyPatterns, conversations, loading };
+  return { weeklyStats, categorizations, insights, hourlyPatterns, conversations, weeklyReports, loading };
 }
 
 // ═══ DERIVED DATA ═══
@@ -461,20 +464,103 @@ function InsightCard({ insight, defaultExpanded = false }) {
   );
 }
 
+// ═══ INSIGHTS SUB-COMPONENTS ═══
+
+function CollapsibleSection({ title, count, defaultOpen = false, icon, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Card style={{ overflow: "hidden", padding: 0 }}>
+      <div onClick={() => setOpen(!open)} style={{
+        padding: "16px 22px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+        background: open ? C.borderLight : C.white, transition: "background 0.15s ease",
+        userSelect: "none",
+      }}>
+        {icon && <span style={{ fontSize: 16, opacity: 0.5 }}>{icon}</span>}
+        <span style={{ fontSize: 15, fontWeight: 700, color: C.text, flex: 1 }}>{title}</span>
+        {count != null && (
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.textLight, background: C.borderLight, borderRadius: 6, padding: "2px 8px" }}>{count}</span>
+        )}
+        <span style={{ fontSize: 12, color: C.textLight, transition: "transform 0.15s ease", transform: open ? "rotate(90deg)" : "none" }}>▸</span>
+      </div>
+      {open && <div style={{ padding: "4px 22px 22px" }}>{children}</div>}
+    </Card>
+  );
+}
+
+function SignalCard({ signal }) {
+  const [showDetail, setShowDetail] = useState(false);
+  const sev = SEV[signal.severity] || SEV.info;
+  return (
+    <div style={{
+      background: C.white, border: `1px solid ${sev.border}`, borderLeft: `4px solid ${sev.accent}`,
+      borderRadius: 12, overflow: "hidden",
+    }}>
+      <div style={{ padding: "16px 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <Badge label={signal.severity} color={sev.badgeText} bg={sev.badge} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{signal.title}</span>
+        </div>
+        <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.7 }}>{signal.body}</div>
+        {signal.so_what && (
+          <div
+            onClick={() => setShowDetail(!showDetail)}
+            style={{
+              marginTop: 10, cursor: "pointer", fontSize: 12, fontWeight: 600,
+              color: sev.accent, display: "flex", alignItems: "center", gap: 4,
+            }}
+          >
+            <span style={{ transform: showDetail ? "rotate(90deg)" : "none", transition: "transform 0.15s ease", display: "inline-block" }}>▸</span>
+            So what?
+          </div>
+        )}
+        {showDetail && signal.so_what && (
+          <div style={{
+            marginTop: 8, padding: "12px 16px", background: sev.bg, borderRadius: 8,
+            fontSize: 13, color: C.text, lineHeight: 1.7, borderLeft: `3px solid ${sev.accent}`,
+          }}>{signal.so_what}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FrictionRow({ family, contacts, summary }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden" }}>
+      <div onClick={() => setOpen(!open)} style={{
+        padding: "12px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
+        background: open ? "#FEF2F2" : C.white, transition: "background 0.15s ease",
+      }}>
+        <span style={{
+          fontSize: 11, fontWeight: 800, color: "#DC2626", background: "#FEE2E2",
+          borderRadius: 6, padding: "2px 8px", minWidth: 24, textAlign: "center",
+        }}>{contacts}x</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.text, flex: 1 }}>{family}</span>
+        <span style={{ fontSize: 12, color: C.textLight, transform: open ? "rotate(90deg)" : "none", transition: "transform 0.15s ease" }}>▸</span>
+      </div>
+      {open && (
+        <div style={{ padding: "0 16px 14px", fontSize: 13, color: C.textMid, lineHeight: 1.7 }}>{summary}</div>
+      )}
+    </div>
+  );
+}
+
 // ═══ INSIGHTS TAB ═══
 
-function InsightsTab({ data }) {
+function InsightsTab({ data, weeklyReports = [] }) {
   const parseWeekDate = s => { const d = new Date(s + ", 2026"); return isNaN(d) ? 0 : d.getTime(); };
 
-  // Build sorted week list from available data
+  // Build sorted week list from conversations + reports
   const weekLabels = [...new Set([
     ...data.filteredConvos.map(c => c.week_label).filter(Boolean),
+    ...weeklyReports.map(r => r.week_label).filter(Boolean),
   ])].sort((a, b) => parseWeekDate(a) - parseWeekDate(b));
 
   const latestWeek = weekLabels.length > 0 ? weekLabels[weekLabels.length - 1] : null;
 
   const [selectedWeek, setSelectedWeek] = useState(latestWeek);
-  const [view, setView] = useState("weekly"); // "weekly" | "monthly"
+  const [view, setView] = useState("weekly");
 
   // Build month groups from weeks
   const monthGroups = {};
@@ -490,9 +576,13 @@ function InsightsTab({ data }) {
   const latestMonth = monthKeys.length > 0 ? monthKeys[monthKeys.length - 1] : null;
   const [selectedMonth, setSelectedMonth] = useState(latestMonth);
 
+  // Find report for selected week
+  const report = weeklyReports.find(r => r.week_label === selectedWeek);
+  const parseJSON = v => { try { return typeof v === "string" ? JSON.parse(v) : (v || []); } catch { return []; } };
+
   return (
     <>
-      {/* View toggle: Weekly / Monthly */}
+      {/* View toggle */}
       <div style={{
         display: "flex", gap: 4, marginBottom: 24, marginTop: 8,
         background: C.borderLight, borderRadius: 10, padding: 4, width: "fit-content",
@@ -513,39 +603,208 @@ function InsightsTab({ data }) {
         <>
           {/* Week selector pills */}
           {weekLabels.length > 0 && (
-            <div style={{
-              display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20,
-            }}>
-              {weekLabels.map(wl => (
-                <button key={wl} onClick={() => setSelectedWeek(wl)} style={{
-                  border: `1px solid ${selectedWeek === wl ? C.navy : C.border}`,
-                  background: selectedWeek === wl ? C.navy : C.white,
-                  color: selectedWeek === wl ? "white" : C.textMid,
-                  borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600,
-                  cursor: "pointer", transition: "all 0.15s ease",
-                }}>Week of {wl}</button>
-              ))}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+              {weekLabels.map(wl => {
+                const hasReport = weeklyReports.some(r => r.week_label === wl);
+                return (
+                  <button key={wl} onClick={() => setSelectedWeek(wl)} style={{
+                    border: `1px solid ${selectedWeek === wl ? C.navy : C.border}`,
+                    background: selectedWeek === wl ? C.navy : C.white,
+                    color: selectedWeek === wl ? "white" : C.textMid,
+                    borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600,
+                    cursor: "pointer", transition: "all 0.15s ease",
+                    position: "relative",
+                  }}>
+                    Week of {wl}
+                    {hasReport && <span style={{
+                      position: "absolute", top: -3, right: -3, width: 8, height: 8,
+                      borderRadius: "50%", background: C.green, border: `2px solid ${C.white}`,
+                    }} />}
+                  </button>
+                );
+              })}
             </div>
           )}
 
-          {/* Weekly empty state */}
-          <Card style={{ padding: 48, textAlign: "center" }}>
-            <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◆</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>Weekly insights will appear here</div>
-            <div style={{ fontSize: 13, color: C.textLight, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
-              Signals, trends, and action items for the week of {selectedWeek || "—"} will be added soon.
+          {/* Report content or empty state */}
+          {report ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* ── Executive Summary ── */}
+              <Card style={{
+                borderLeft: `4px solid ${C.blue}`,
+                background: `linear-gradient(135deg, ${C.white} 0%, #F8FAFC 100%)`,
+              }}>
+                {report.week_type && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Badge label={report.week_type} color={C.blue} bg="#DBEAFE" />
+                  </div>
+                )}
+                <div style={{ fontSize: 14, color: C.text, lineHeight: 1.8, marginBottom: 16 }}>
+                  {report.exec_summary}
+                </div>
+                {/* Stat pills */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+                  {parseJSON(report.exec_stats).map((s, i) => (
+                    <div key={i} style={{
+                      background: C.white, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px",
+                    }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight, marginBottom: 4 }}>{s.label}</div>
+                      <div style={{ fontSize: 22, fontWeight: 800, color: C.navy, letterSpacing: -0.5 }}>{s.value}</div>
+                      {s.detail && <div style={{ fontSize: 11, color: C.textLight, marginTop: 3 }}>{s.detail}</div>}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* ── Signals ── */}
+              {parseJSON(report.signals).length > 0 && (
+                <CollapsibleSection title="Signals" count={parseJSON(report.signals).length} icon="⚡" defaultOpen={true}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                    {parseJSON(report.signals).map((s, i) => <SignalCard key={i} signal={s} />)}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* ── Noise ── */}
+              {parseJSON(report.noise).length > 0 && (
+                <CollapsibleSection title="Noise" count={parseJSON(report.noise).length} icon="〰">
+                  <div style={{ fontSize: 11, color: C.textLight, marginBottom: 10, marginTop: 4 }}>Volume that looks concerning but isn't. Don't overreact.</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {parseJSON(report.noise).map((n, i) => (
+                      <div key={i} style={{
+                        padding: "10px 14px", background: "#F8FAFC", borderRadius: 8,
+                        border: `1px solid ${C.borderLight}`,
+                      }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{n.title}</span>
+                        <span style={{ fontSize: 12, color: C.textLight, marginLeft: 8 }}>— {n.body}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* ── Friction Map ── */}
+              {(parseJSON(report.friction_high).length > 0 || parseJSON(report.friction_repeats).length > 0) && (
+                <CollapsibleSection
+                  title="Friction Map"
+                  count={parseJSON(report.friction_high).length + parseJSON(report.friction_repeats).length}
+                  icon="🔥"
+                >
+                  {parseJSON(report.friction_high).length > 0 && (
+                    <>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.5, marginTop: 8, marginBottom: 8 }}>
+                        High-Friction Families (3+ contacts)
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+                        {parseJSON(report.friction_high).map((f, i) => (
+                          <FrictionRow key={i} family={f.family} contacts={f.contacts} summary={f.summary} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {parseJSON(report.friction_repeats).length > 0 && (
+                    <>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: C.orange, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+                        Repeat Contacts (2x)
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+                        {parseJSON(report.friction_repeats).map((f, i) => (
+                          <FrictionRow key={i} family={f.family} contacts={f.contacts} summary={f.issue} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {parseJSON(report.friction_prospects).length > 0 && (
+                    <>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: C.yellow, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+                        Prospect Friction
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        {parseJSON(report.friction_prospects).map((f, i) => (
+                          <div key={i} style={{
+                            display: "flex", alignItems: "center", gap: 10, padding: "8px 14px",
+                            background: "#FFFBEB", borderRadius: 8, border: `1px solid #FDE68A`,
+                          }}>
+                            <span style={{ fontSize: 12, fontWeight: 800, color: C.yellowDark, minWidth: 24 }}>{f.count}x</span>
+                            <span style={{ fontSize: 13, color: C.text }}>{f.issue}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </CollapsibleSection>
+              )}
+
+              {/* ── Front Door Health ── */}
+              {report.front_door_assessment && (
+                <CollapsibleSection title="Front Door Health" icon="🚪">
+                  {/* Stats row */}
+                  {parseJSON(report.front_door_stats).length > 0 && (
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8, marginBottom: 14 }}>
+                      {parseJSON(report.front_door_stats).map((s, i) => (
+                        <div key={i} style={{
+                          background: "#EFF6FF", border: `1px solid #BFDBFE`, borderRadius: 8, padding: "8px 14px",
+                        }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight }}>{s.label}</div>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: C.navy }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Assessment */}
+                  <div style={{
+                    padding: "14px 16px", background: "#F8FAFC", borderRadius: 10,
+                    border: `1px solid ${C.border}`, fontSize: 13, color: C.text, lineHeight: 1.7, marginBottom: 14,
+                  }}>{report.front_door_assessment}</div>
+                  {/* Friction points */}
+                  {parseJSON(report.front_door_friction).length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {parseJSON(report.front_door_friction).map((f, i) => (
+                        <div key={i} style={{
+                          padding: "12px 16px", border: `1px solid ${C.border}`, borderRadius: 10,
+                        }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: C.navy, marginBottom: 4 }}>{f.category}</div>
+                          <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.6 }}>{f.details}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleSection>
+              )}
+
+              {/* ── Volume Note ── */}
+              {report.volume_note && (
+                <CollapsibleSection title="Volume Note" icon="📊">
+                  <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.7, marginTop: 6 }}>{report.volume_note}</div>
+                  {parseJSON(report.channel_split).length > 0 && (
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+                      {parseJSON(report.channel_split).map((ch, i) => (
+                        <div key={i} style={{
+                          padding: "6px 12px", background: C.borderLight, borderRadius: 8,
+                          fontSize: 12, fontWeight: 600, color: C.textMid,
+                        }}>{ch.channel}: {ch.count} ({ch.pct}%)</div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleSection>
+              )}
             </div>
-          </Card>
+          ) : (
+            <Card style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◆</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>No report for this week yet</div>
+              <div style={{ fontSize: 13, color: C.textLight, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
+                Weekly insights for the week of {selectedWeek || "—"} will be added when available.
+              </div>
+            </Card>
+          )}
         </>
       )}
 
       {view === "monthly" && (
         <>
-          {/* Month selector pills */}
           {monthKeys.length > 0 && (
-            <div style={{
-              display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20,
-            }}>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
               {monthKeys.map(mk => (
                 <button key={mk} onClick={() => setSelectedMonth(mk)} style={{
                   border: `1px solid ${selectedMonth === mk ? C.navy : C.border}`,
@@ -557,8 +816,6 @@ function InsightsTab({ data }) {
               ))}
             </div>
           )}
-
-          {/* Monthly empty state */}
           <Card style={{ padding: 48, textAlign: "center" }}>
             <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◈</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>Monthly insights will appear here</div>
@@ -1289,7 +1546,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState("insights");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [inboxFilter, setInboxFilter] = useState("all");
-  const { weeklyStats, categorizations, insights, hourlyPatterns, conversations, loading } = useSupabase();
+  const { weeklyStats, categorizations, insights, hourlyPatterns, conversations, weeklyReports, loading } = useSupabase();
 
   const data = useMemo(
     () => deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conversations, dateRange, inboxFilter),
@@ -1495,7 +1752,7 @@ export default function Dashboard() {
         <main style={{ flex: 1, overflow: "auto", padding: "24px 32px 64px" }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             {tab === "overview" && <OverviewTab data={data} avgWeeklyVol={avgWeeklyVol} volRtData={volRtData} />}
-            {tab === "insights" && <InsightsTab data={data} />}
+            {tab === "insights" && <InsightsTab data={data} weeklyReports={weeklyReports} />}
             {tab === "categories" && <CategoriesTab data={data} weekly={data.weekly} TOP4={TOP4} />}
             {tab === "volume" && <VolumeTab data={data} avgWeeklyVol={avgWeeklyVol} volRtData={volRtData} />}
             {tab === "team" && <TeamTab data={data} />}
