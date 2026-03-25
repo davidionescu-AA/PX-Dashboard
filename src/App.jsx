@@ -75,13 +75,15 @@ function useSupabase() {
 
   useEffect(() => {
     async function load() {
-      const [ws, cat, ins, hp, wr] = await Promise.all([
+      const [ws, cat, ins, hp] = await Promise.all([
         supabase.from("weekly_stats").select("*").order("week_label"),
         supabase.from("categorizations").select("*"),
         supabase.from("weekly_insights").select("*").eq("status", "published"),
         supabase.from("hourly_patterns").select("*").order("hour_num"),
-        supabase.from("weekly_reports").select("*").eq("status", "published"),
       ]);
+      // Fetch weekly reports separately so errors don't block the main dashboard
+      let wr = { data: [] };
+      try { wr = await supabase.from("weekly_reports").select("*").eq("status", "published"); } catch (e) { console.warn("weekly_reports fetch failed:", e); }
       // Fetch conversations — try with first_response_min, fall back without it
       let conv = await supabase.from("conversations").select("id,created_at,user_name,assigned_agent,state,subject,week_label,message_count,source_channel,first_response_min");
       if (conv.error) {
