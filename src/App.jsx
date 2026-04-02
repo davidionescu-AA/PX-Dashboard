@@ -1296,6 +1296,32 @@ const WEEKLY_DRIVERS = [
     ],
     summary: "A stabilization week with healthy leading indicators.",
   },
+  {
+    week: "Mar 16", convos: 153, cancellations: 6,
+    oneLiner: "Lauren Cole churned + ClassBank upgrade confusion + 6 cancellations",
+    highlights: [
+      { label: "Cancellations", value: "6", note: "3 from churn analysis (Cole, Godfrey, Christiansen)" },
+      { label: "Account & Billing", value: "14 convos", note: "highest ever — cancellations + refunds" },
+      { label: "Rewards", value: "10 convos", note: "ClassBank upgrade confusion spike" },
+      { label: "Student contacts", value: "16", note: "all-time high — students navigating independently" },
+      { label: "Refund requests", value: "2", note: "under 45-day guarantee (Hamaoui, Talbot)" },
+      { label: "YouTube concern", value: "2nd family", note: "Pellegrino proactively blocks YouTube" },
+    ],
+    summary: "Cancellation week — 3 churn analysis predictions materialized. ClassBank upgrade email created cross-cutting confusion.",
+  },
+  {
+    week: "Mar 23", convos: 163, cancellations: 6,
+    oneLiner: "Highest cancellation week + YouTube escalation + pre-launch pipeline",
+    highlights: [
+      { label: "Cancellations", value: "6", note: "Thannisch (3 boys), Benitt (bracketing), Lovell, Goodman, Cohen, Fett" },
+      { label: "Enrollment", value: "25 convos", note: "up from 17 — Mar 30 pre-launch" },
+      { label: "Open rate", value: "32%", note: "43 of 135 still open — highest of any week" },
+      { label: "YouTube concern", value: "3rd family", note: "Meyer — children wasting time, family in crisis" },
+      { label: "International", value: "4 countries", note: "Australia, Mexico, Hong Kong, UK" },
+      { label: "Pricing gap", value: "5 convos", note: "families replying to marketing can't find cost" },
+    ],
+    summary: "The YouTube-in-StudyReel concern peaked with a third family. Cancellations confirmed bracketing and Dash trust patterns from earlier weeks.",
+  },
 ];
 
 function WeeklyDriverRow({ driver }) {
