@@ -71,6 +71,7 @@ function useSupabase() {
   const [hourlyPatterns, setHourlyPatterns] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [weeklyReports, setWeeklyReports] = useState([]);
+  const [monthlyReports, setMonthlyReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,7 +84,9 @@ function useSupabase() {
       ]);
       // Fetch weekly reports separately so errors don't block the main dashboard
       let wr = { data: [] };
+      let mr = { data: [] };
       try { wr = await supabase.from("weekly_reports").select("*").eq("status", "published"); } catch (e) { console.warn("weekly_reports fetch failed:", e); }
+      try { mr = await supabase.from("monthly_reports").select("*").eq("status", "published"); } catch (e) { console.warn("monthly_reports fetch failed:", e); }
       // Fetch conversations — try with first_response_min, fall back without it
       let conv = await supabase.from("conversations").select("id,created_at,user_name,assigned_agent,state,subject,week_label,message_count,source_channel,first_response_min");
       if (conv.error) {
@@ -95,12 +98,13 @@ function useSupabase() {
       setHourlyPatterns(hp.data || []);
       setConversations(conv.data || []);
       setWeeklyReports(wr.data || []);
+      setMonthlyReports(mr.data || []);
       setLoading(false);
     }
     load();
   }, []);
 
-  return { weeklyStats, categorizations, insights, hourlyPatterns, conversations, weeklyReports, loading };
+  return { weeklyStats, categorizations, insights, hourlyPatterns, conversations, weeklyReports, monthlyReports, loading };
 }
 
 // ═══ DERIVED DATA ═══
@@ -575,7 +579,7 @@ function FrictionRow({ family, contacts, summary }) {
 
 // ═══ INSIGHTS TAB ═══
 
-function InsightsTab({ data, weeklyReports = [] }) {
+function InsightsTab({ data, weeklyReports = [], monthlyReports = [] }) {
   const parseWeekDate = s => { const d = new Date(s + ", 2026"); return isNaN(d) ? 0 : d.getTime(); };
 
   // Build sorted week list from conversations + reports
@@ -863,30 +867,197 @@ function InsightsTab({ data, weeklyReports = [] }) {
         </>
       )}
 
-      {view === "monthly" && (
+      {view === "monthly" && (() => {
+        const mLabels = [...new Set([
+          ...monthKeys,
+          ...monthlyReports.map(r => r.month_label).filter(Boolean),
+        ])].sort((a, b) => new Date(a) - new Date(b));
+        const mReport = monthlyReports.find(r => r.month_label === selectedMonth);
+        return (
         <>
-          {monthKeys.length > 0 && (
+          {mLabels.length > 0 && (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
-              {monthKeys.map(mk => (
+              {mLabels.map(mk => {
+                const hasReport = monthlyReports.some(r => r.month_label === mk);
+                return (
                 <button key={mk} onClick={() => setSelectedMonth(mk)} style={{
                   border: `1px solid ${selectedMonth === mk ? C.navy : C.border}`,
                   background: selectedMonth === mk ? C.navy : C.white,
                   color: selectedMonth === mk ? "white" : C.textMid,
                   borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600,
-                  cursor: "pointer", transition: "all 0.15s ease",
-                }}>{mk}</button>
-              ))}
+                  cursor: "pointer", transition: "all 0.15s ease", position: "relative",
+                }}>
+                  {mk}
+                  {hasReport && <span style={{
+                    position: "absolute", top: -3, right: -3, width: 8, height: 8,
+                    borderRadius: "50%", background: C.green, border: `2px solid ${selectedMonth === mk ? C.navy : C.white}`,
+                    boxShadow: "0 1px 3px rgba(34,197,94,0.4)",
+                  }} />}
+                </button>
+                );
+              })}
             </div>
           )}
-          <Card style={{ padding: 48, textAlign: "center" }}>
-            <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◈</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>Monthly insights will appear here</div>
-            <div style={{ fontSize: 13, color: C.textLight, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
-              A consolidated monthly view for {selectedMonth || "—"} covering trends, patterns, and recommendations across all weeks.
+
+          {mReport ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              {/* ── Executive Summary ── */}
+              <div style={{
+                borderRadius: 18, overflow: "hidden",
+                background: `linear-gradient(145deg, #0A1628 0%, #162037 50%, #1E293B 100%)`,
+                padding: "28px 28px 24px", color: "white",
+                boxShadow: "0 8px 32px rgba(10,22,40,0.25)",
+              }}>
+                {mReport.month_type && (
+                  <div style={{ marginBottom: 14 }}>
+                    <span style={{
+                      fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase",
+                      color: "#93C5FD", background: "rgba(59,130,246,0.15)",
+                      borderRadius: 6, padding: "4px 10px", border: "1px solid rgba(59,130,246,0.2)",
+                    }}>{mReport.month_type}</span>
+                  </div>
+                )}
+                <div style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", lineHeight: 1.8, letterSpacing: -0.1 }}>
+                  {mReport.exec_summary}
+                </div>
+              </div>
+
+              {/* ── Stat grid ── */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                {parseJSON(mReport.exec_stats).map((s, i) => (
+                  <div key={i} style={{
+                    background: C.white, border: `1px solid ${C.borderLight}`, borderRadius: 14, padding: "16px 18px",
+                    boxShadow: "0 1px 4px rgba(15,23,42,0.04)",
+                  }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: C.textLight, marginBottom: 6 }}>{s.label}</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: C.navy, letterSpacing: -0.5, lineHeight: 1 }}>{s.value}</div>
+                    {s.detail && <div style={{ fontSize: 11, color: C.textLight, marginTop: 6, lineHeight: 1.4 }}>{s.detail}</div>}
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Key Trends ── */}
+              {parseJSON(mReport.key_trends).length > 0 && (
+                <CollapsibleSection title="Key Trends" count={parseJSON(mReport.key_trends).length} icon="📈" defaultOpen={true}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                    {parseJSON(mReport.key_trends).map((t, i) => (
+                      <div key={i} style={{
+                        padding: "16px 20px", background: "#FAFBFC", borderRadius: 14,
+                        border: `1px solid ${C.borderLight}`,
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                          <span style={{ fontSize: 16 }}>{t.icon || "→"}</span>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{t.title}</span>
+                        </div>
+                        <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.7 }}>{t.body}</div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* ── Signals ── */}
+              {parseJSON(mReport.signals).length > 0 && (
+                <CollapsibleSection title="Signals" count={parseJSON(mReport.signals).length} icon="⚡" defaultOpen={true}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                    {parseJSON(mReport.signals).map((s, i) => <SignalCard key={i} signal={s} />)}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* ── Outcomes ── */}
+              {parseJSON(mReport.outcomes).length > 0 && (
+                <CollapsibleSection title="Outcomes" count={parseJSON(mReport.outcomes).length} icon="📋">
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                    {parseJSON(mReport.outcomes).map((o, i) => (
+                      <div key={i} style={{
+                        padding: "14px 18px", background: "#FAFBFC", borderRadius: 12,
+                        border: `1px solid ${C.borderLight}`,
+                      }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{o.title}</span>
+                        <div style={{ fontSize: 12.5, color: C.textMid, marginTop: 4, lineHeight: 1.6 }}>{o.body}</div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* ── Friction Patterns ── */}
+              {parseJSON(mReport.friction_patterns).length > 0 && (
+                <CollapsibleSection title="Friction Patterns" count={parseJSON(mReport.friction_patterns).length} icon="🔥">
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                    {parseJSON(mReport.friction_patterns).map((f, i) => (
+                      <div key={i} style={{
+                        padding: "14px 18px", borderRadius: 12,
+                        border: `1px solid ${C.borderLight}`,
+                      }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{f.title}</span>
+                        <div style={{ fontSize: 12.5, color: C.textMid, marginTop: 4, lineHeight: 1.6 }}>{f.body}</div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* ── Front Door Health ── */}
+              {mReport.front_door && (() => {
+                const fd = parseJSON(mReport.front_door);
+                return (
+                <CollapsibleSection title="Front Door Health" icon="🚪">
+                  {(fd.stats || []).length > 0 && (
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4, marginBottom: 16 }}>
+                      {fd.stats.map((s, i) => (
+                        <div key={i} style={{
+                          background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
+                          border: `1px solid #BFDBFE`, borderRadius: 12, padding: "10px 16px",
+                        }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: C.textLight }}>{s.label}</div>
+                          <div style={{ fontSize: 20, fontWeight: 800, color: C.navy, letterSpacing: -0.3 }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {fd.assessment && (
+                    <div style={{
+                      padding: "16px 20px", background: "#FAFBFC", borderRadius: 12,
+                      border: `1px solid ${C.borderLight}`, fontSize: 13, color: C.text, lineHeight: 1.75, marginBottom: 16,
+                    }}>{fd.assessment}</div>
+                  )}
+                  {(fd.friction || []).length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {fd.friction.map((f, i) => (
+                        <div key={i} style={{
+                          padding: "14px 18px", border: `1px solid ${C.borderLight}`, borderRadius: 12,
+                        }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: C.navy, marginBottom: 5 }}>{f.category}</div>
+                          <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.7 }}>{f.details}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleSection>
+                );
+              })()}
+
+              {/* ── Looking Ahead ── */}
+              {mReport.looking_ahead && (
+                <CollapsibleSection title="Looking Ahead" icon="🔭">
+                  <div style={{ fontSize: 13, color: C.textMid, lineHeight: 1.75, marginTop: 4 }}>{mReport.looking_ahead}</div>
+                </CollapsibleSection>
+              )}
             </div>
-          </Card>
+          ) : (
+            <Card style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◈</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: C.textMid, marginBottom: 6 }}>No report for this month yet</div>
+              <div style={{ fontSize: 13, color: C.textLight, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
+                A consolidated monthly view for {selectedMonth || "—"} covering trends, patterns, and recommendations across all weeks.
+              </div>
+            </Card>
+          )}
         </>
-      )}
+        );
+      })()}
     </>
   );
 }
@@ -1608,7 +1779,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState("insights");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [inboxFilter, setInboxFilter] = useState("all");
-  const { weeklyStats, categorizations, insights, hourlyPatterns, conversations, weeklyReports, loading } = useSupabase();
+  const { weeklyStats, categorizations, insights, hourlyPatterns, conversations, weeklyReports, monthlyReports, loading } = useSupabase();
 
   const data = useMemo(
     () => deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conversations, dateRange, inboxFilter),
@@ -1814,7 +1985,7 @@ export default function Dashboard() {
         <main style={{ flex: 1, overflow: "auto", padding: "24px 32px 64px" }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             {tab === "overview" && <OverviewTab data={data} avgWeeklyVol={avgWeeklyVol} volRtData={volRtData} />}
-            {tab === "insights" && <InsightsTab data={data} weeklyReports={weeklyReports} />}
+            {tab === "insights" && <InsightsTab data={data} weeklyReports={weeklyReports} monthlyReports={monthlyReports} />}
             {tab === "categories" && <CategoriesTab data={data} weekly={data.weekly} TOP4={TOP4} />}
             {tab === "volume" && <VolumeTab data={data} avgWeeklyVol={avgWeeklyVol} volRtData={volRtData} />}
             {tab === "team" && <TeamTab data={data} />}
