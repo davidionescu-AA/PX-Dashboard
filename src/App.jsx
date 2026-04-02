@@ -483,18 +483,19 @@ function CollapsibleSection({ title, count, defaultOpen = false, icon, children 
       transition: "all 0.2s ease",
     }}>
       <div onClick={() => setOpen(!open)} style={{
-        padding: "18px 24px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
+        padding: "18px 24px", cursor: "pointer",
+        display: "grid", gridTemplateColumns: "28px 1fr auto auto", alignItems: "center", gap: 0,
         background: C.white, transition: "all 0.15s ease",
         userSelect: "none", borderBottom: open ? `1px solid ${C.borderLight}` : "1px solid transparent",
       }}>
-        {icon && <span style={{ fontSize: 15, width: 24, textAlign: "center", flexShrink: 0 }}>{icon}</span>}
-        <span style={{ fontSize: 14, fontWeight: 700, color: C.text, flex: 1, letterSpacing: -0.2 }}>{title}</span>
-        {count != null && (
+        <span style={{ fontSize: 15, width: 28, textAlign: "left" }}>{icon || ""}</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: C.text, letterSpacing: -0.2, textAlign: "left" }}>{title}</span>
+        {count != null ? (
           <span style={{
             fontSize: 11, fontWeight: 700, color: C.blue, background: "#EFF6FF",
-            borderRadius: 20, padding: "3px 10px", lineHeight: 1,
+            borderRadius: 20, padding: "3px 10px", lineHeight: 1, marginRight: 10,
           }}>{count}</span>
-        )}
+        ) : <span style={{ marginRight: 10 }} />}
         <span style={{
           fontSize: 11, color: C.textLight, transition: "transform 0.2s ease",
           transform: open ? "rotate(90deg)" : "none", opacity: 0.5,
