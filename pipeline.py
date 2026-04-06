@@ -350,8 +350,8 @@ def extract_agent(row):
     """Extract the first human agent (admin) who replied, from the conversation text."""
     conv = row.get("full_conversation", "")
 
-    # Look for lines like: [2026-03-13 16:22:50] Mary Betz (admin): ...
-    admin_pattern = re.compile(r"\[.*?\]\s+(.+?)\s+\(admin\):")
+    # Look for lines like: [2026-03-13 16:22:50] Mary Betz (admin): ... or (admin|comment):
+    admin_pattern = re.compile(r"\[.*?\]\s+(.+?)\s+\(admin(?:\|[^)]*)?\):")
     for match in admin_pattern.finditer(conv):
         name = match.group(1).strip()
         if name and name not in AUTOMATED_SENDERS:
@@ -422,8 +422,8 @@ def extract_first_response_minutes(row):
     lines = conv.split("\n")
 
     ts_pattern = re.compile(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s+(.+?):\s")
-    admin_pattern = re.compile(r"\(admin\)")
-    bot_pattern = re.compile(r"\(bot\)")
+    admin_pattern = re.compile(r"\(admin(?:\|[^)]*)?\)")  # matches (admin) or (admin|comment)
+    bot_pattern = re.compile(r"\(bot(?:\|[^)]*)?\)")      # matches (bot) or (bot|assignment)
 
     first_customer_ts = None
     first_admin_ts = None
@@ -464,6 +464,110 @@ def extract_first_response_minutes(row):
         return minutes
 
     return None
+
+
+def extract_exchanges(row):
+    """Parse all real message exchanges from a conversation.
+
+    Returns dict with:
+      parent_messages  — count of real parent/user messages
+      team_replies     — count of real admin replies
+      exchange_count   — number of user→admin paired exchanges
+      all_response_times — list of RT in minutes for each exchange
+      exchanges        — list of dicts with user_ts, admin_ts, admin_name, rt_minutes
+    """
+    conv = row.get("full_conversation", "")
+    lines = conv.split("\n")
+
+    # Regex handles both old and new formats:
+    #   Old: [ts] Author (admin): body    or   [ts] Author: body (no tag)
+    #   New: [ts] Author (admin|comment): body
+    ts_pattern = re.compile(
+        r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s+(.+?)(?:\s+\(([^)]*)\))?:\s*(.*)"
+    )
+
+    # Collect classified messages in order
+    messages = []
+    for line in lines:
+        line = line.strip()
+        m = ts_pattern.match(line)
+        if not m:
+            continue
+
+        ts_str, sender, type_info, body_start = m.group(1), m.group(2).strip(), m.group(3), m.group(4)
+
+        try:
+            ts = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            continue
+
+        # Determine body emptiness (body_start is just the first line after colon)
+        body_text = body_start.strip() if body_start else ""
+        if not body_text or body_text == "None":
+            continue
+
+        type_info = type_info or ""
+
+        if "|" in type_info:
+            # New format: (author_type|part_type)
+            author_type, part_type = type_info.split("|", 1)
+            # Only comment and source are real messages
+            if part_type not in ("comment", "source"):
+                continue
+            if author_type == "bot":
+                continue
+            if author_type == "admin":
+                if sender in AUTOMATED_SENDERS:
+                    continue
+                messages.append({"ts": ts, "role": "admin", "sender": sender})
+            else:
+                messages.append({"ts": ts, "role": "user", "sender": sender})
+        else:
+            # Old format: (admin), (bot), or no tag
+            if "bot" in type_info:
+                continue
+            if "admin" in type_info:
+                if sender in AUTOMATED_SENDERS:
+                    continue
+                messages.append({"ts": ts, "role": "admin", "sender": sender})
+            else:
+                messages.append({"ts": ts, "role": "user", "sender": sender})
+
+    # State machine to pair exchanges
+    parent_messages = 0
+    team_replies = 0
+    exchanges = []
+    waiting_for_admin = False
+    user_ts = None
+
+    for msg in messages:
+        if msg["role"] == "user":
+            parent_messages += 1
+            if not waiting_for_admin:
+                user_ts = msg["ts"]
+                waiting_for_admin = True
+            # If already waiting, keep original user_ts (RT from when they started waiting)
+        elif msg["role"] == "admin":
+            team_replies += 1
+            if waiting_for_admin and user_ts is not None:
+                rt = business_hours_between(user_ts, msg["ts"])
+                if rt >= 1:  # Same threshold as first-response
+                    exchanges.append({
+                        "user_ts": user_ts.isoformat(),
+                        "admin_ts": msg["ts"].isoformat(),
+                        "admin_name": msg["sender"],
+                        "rt_minutes": rt,
+                    })
+                waiting_for_admin = False
+                user_ts = None
+
+    return {
+        "parent_messages": parent_messages,
+        "team_replies": team_replies,
+        "exchange_count": len(exchanges),
+        "all_response_times": [e["rt_minutes"] for e in exchanges],
+        "exchanges": exchanges,
+    }
 
 
 # ═══ CONVERSATION CLEANING ═══
@@ -705,7 +809,10 @@ def compute_weekly_stats(conversations, categorizations):
     """Aggregate conversations into weekly stats."""
     weeks = defaultdict(lambda: {
         "conversations": [],
-        "agents": defaultdict(lambda: {"conversations": 0, "messages": 0, "response_times": []}),
+        "agents": defaultdict(lambda: {
+            "conversations": 0, "messages": 0, "response_times": [],
+            "reply_count": 0, "exchange_rts": [],
+        }),
         "categories": defaultdict(int),
     })
 
@@ -722,10 +829,18 @@ def compute_weekly_stats(conversations, categorizations):
             continue
         weeks[week]["agents"][agent]["conversations"] += 1
 
-        # Response time
+        # First-response time (existing metric)
         resp_min = convo.get("_response_minutes")
         if resp_min is not None:
             weeks[week]["agents"][agent]["response_times"].append(resp_min)
+
+        # Exchange-level stats: attribute each reply to the admin who sent it
+        exch = convo.get("_exchanges", {})
+        for ex in exch.get("exchanges", []):
+            ex_agent = ex.get("admin_name", "")
+            if ex_agent in TEAM_AGENTS:
+                weeks[week]["agents"][ex_agent]["exchange_rts"].append(ex["rt_minutes"])
+                weeks[week]["agents"][ex_agent]["reply_count"] += 1
 
         # Use actual message_count from CSV
         msg_count = convo.get("message_count", "")
@@ -768,6 +883,17 @@ def compute_weekly_stats(conversations, categorizations):
                 entry["p75"] = round(sorted_rt[min(n - 1, int(n * 0.75))], 1) if n >= 2 else round(sorted_rt[0], 1)
                 entry["p90"] = round(sorted_rt[min(n - 1, int(n * 0.90))], 1) if n >= 2 else round(sorted_rt[0], 1)
                 entry["response_count"] = n
+
+            # Exchange-level RT stats (all replies, not just first response)
+            ex_rts = agent_data["exchange_rts"]
+            entry["reply_count"] = agent_data["reply_count"]
+            if ex_rts:
+                sorted_ex = sorted(ex_rts)
+                ne = len(sorted_ex)
+                entry["exchange_median_rt"] = round(median(sorted_ex), 1)
+                entry["exchange_mean_rt"] = round(sum(sorted_ex) / ne, 1)
+                entry["exchange_p90_rt"] = round(sorted_ex[min(ne - 1, int(ne * 0.90))], 1) if ne >= 2 else round(sorted_ex[0], 1)
+
             agent_stats.append(entry)
 
         # Determine the top volume driver category for this week
@@ -1245,6 +1371,7 @@ def run_pipeline(csv_path, skip_categorize=False, skip_insights=False):
             csv_admin = row.get("admin_name", "").strip()
             row["_agent"] = csv_admin if csv_admin else extract_agent(row)
             row["_response_minutes"] = extract_first_response_minutes(row)
+            row["_exchanges"] = extract_exchanges(row)
             conversations.append(row)
 
     filtered_out = len(raw_rows) - len(conversations) - skipped_before_start

@@ -184,10 +184,32 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
     }
   });
 
+  // Aggregate exchange-level stats from weekly_stats agent_stats JSON
+  const exchangeByAgent = {};
+  filteredWeekLabels.forEach(wl => {
+    const meta = weekMeta[wl];
+    if (!meta?.agent_stats) return;
+    try {
+      const agents = typeof meta.agent_stats === "string" ? JSON.parse(meta.agent_stats) : meta.agent_stats;
+      agents.forEach(a => {
+        if (!TEAM_NAMES.has(a.name)) return;
+        if (!exchangeByAgent[a.name]) exchangeByAgent[a.name] = { replyCount: 0, exchangeMedianRT: null, exchangeMeanRT: null, exchangeP90RT: null };
+        if (a.reply_count) exchangeByAgent[a.name].replyCount += a.reply_count;
+        // For RT, use latest week with data (since we can't merge medians)
+        if (a.exchange_median_rt != null) {
+          exchangeByAgent[a.name].exchangeMedianRT = a.exchange_median_rt;
+          exchangeByAgent[a.name].exchangeMeanRT = a.exchange_mean_rt;
+          exchangeByAgent[a.name].exchangeP90RT = a.exchange_p90_rt;
+        }
+      });
+    } catch(e) {}
+  });
+
   const agentList = Object.entries(agentMap)
     .map(([name, d]) => {
       const sorted = [...d.rts].sort((a, b) => a - b);
       const rawMedian = med(sorted);
+      const ex = exchangeByAgent[name] || {};
       return {
         name,
         conversations: d.conversations,
@@ -198,6 +220,10 @@ function deriveData(weeklyStats, categorizations, hourlyPatterns, insights, conv
         p75: sorted.length > 0 ? Math.round(percentile(sorted, 0.75)) : null,
         p90: sorted.length > 0 ? Math.round(percentile(sorted, 0.90)) : null,
         responseCount: sorted.length,
+        replyCount: ex.replyCount || null,
+        exchangeMedianRT: ex.exchangeMedianRT != null ? Math.round(ex.exchangeMedianRT) : null,
+        exchangeMeanRT: ex.exchangeMeanRT != null ? Math.round(ex.exchangeMeanRT) : null,
+        exchangeP90RT: ex.exchangeP90RT != null ? Math.round(ex.exchangeP90RT) : null,
         ...AGENT_DISPLAY[name],
       };
     })
@@ -1432,11 +1458,11 @@ function TeamTab({ data }) {
                   <div style={{ display: "flex", gap: 28, marginBottom: 16, flexWrap: "wrap" }}>
                     {[
                       ["Conversations", agent.conversations, `${pct}%`],
-                      ["Messages", agent.messages, null],
-                      ...(agent.medianRT != null ? [["Median RT", `${agent.medianRT}m`, null]] : []),
-                      ...(agent.meanRT != null ? [["Mean RT", `${agent.meanRT}m`, null]] : []),
-                      ...(agent.p90 != null ? [["P90 RT", `${agent.p90}m`, null]] : []),
-                      ...(agent.p25 != null ? [["P25 RT", `${agent.p25}m`, null]] : []),
+                      ...(agent.replyCount != null ? [["Replies", agent.replyCount, null]] : [["Messages", agent.messages, null]]),
+                      ...(agent.exchangeMedianRT != null ? [["Median RT", `${agent.exchangeMedianRT}m`, "all replies"]] : agent.medianRT != null ? [["Median RT", `${agent.medianRT}m`, "1st reply"]] : []),
+                      ...(agent.exchangeMeanRT != null ? [["Mean RT", `${agent.exchangeMeanRT}m`, null]] : agent.meanRT != null ? [["Mean RT", `${agent.meanRT}m`, null]] : []),
+                      ...(agent.exchangeP90RT != null ? [["P90 RT", `${agent.exchangeP90RT}m`, null]] : agent.p90 != null ? [["P90 RT", `${agent.p90}m`, null]] : []),
+                      ...(agent.p25 != null && agent.exchangeMedianRT == null ? [["P25 RT", `${agent.p25}m`, null]] : []),
                     ].map(([l, v, badge]) => (
                       <div key={l}>
                         <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: C.textLight, marginBottom: 4 }}>{l}</div>

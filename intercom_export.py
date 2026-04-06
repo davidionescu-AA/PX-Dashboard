@@ -162,7 +162,7 @@ def build_conversation_text(conv):
             or "User"
         )
         ts = datetime.fromtimestamp(conv.get("created_at", 0)).strftime("%Y-%m-%d %H:%M:%S")
-        parts.append(f"[{ts}] {author}: {conv['source']['body']}")
+        parts.append(f"[{ts}] {author} (user|source): {conv['source']['body']}")
 
     # All conversation parts (replies)
     for part in conv.get("conversation_parts", {}).get("conversation_parts", []):
@@ -175,7 +175,8 @@ def build_conversation_text(conv):
         )
         ts = datetime.fromtimestamp(part.get("created_at", 0)).strftime("%Y-%m-%d %H:%M:%S")
         body = part.get("body", "")
-        parts.append(f"[{ts}] {author_name} ({author_type}): {body}")
+        part_type = part.get("part_type", "unknown")
+        parts.append(f"[{ts}] {author_name} ({author_type}|{part_type}): {body}")
 
     return "\n\n".join(parts)
 
@@ -331,8 +332,8 @@ def export(days_back):
         writer.writeheader()
         writer.writerows(csv_data)
 
-    print(f"\n  ✓ Exported {len(csv_data)} conversations")
-    print(f"  ✓ Saved to: {filepath}")
+    print(f"\n  [OK] Exported {len(csv_data)} conversations")
+    print(f"  [OK] Saved to: {filepath}")
     return filepath
 
 
