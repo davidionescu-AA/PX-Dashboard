@@ -1989,9 +1989,8 @@ export default function Dashboard() {
                 if (m == null) return null;
                 const year = data.dataDateRange.from ? parseInt(data.dataDateRange.from.slice(0, 4)) : new Date().getFullYear();
                 const from = new Date(year, m, parseInt(parts[2]));
-                const to = new Date(from);
-                to.setDate(to.getDate() + 6);
-                const fmt = d => d.toISOString().slice(0, 10);
+                const to = new Date(year, m, parseInt(parts[2]) + 6);
+                const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 return { from: fmt(from), to: fmt(to) };
               })();
               if (!weekDates) return null;

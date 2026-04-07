@@ -834,13 +834,21 @@ def compute_weekly_stats(conversations, categorizations):
         if resp_min is not None:
             weeks[week]["agents"][agent]["response_times"].append(resp_min)
 
-        # Exchange-level stats: attribute each reply to the admin who sent it
+        # Exchange-level stats: attribute each reply to the week it HAPPENED in,
+        # not the week the conversation was created. A reply on March 31 goes into
+        # the "Mar 30" week even if the conversation started in "Mar 23".
         exch = convo.get("_exchanges", {})
         for ex in exch.get("exchanges", []):
             ex_agent = ex.get("admin_name", "")
-            if ex_agent in TEAM_AGENTS:
-                weeks[week]["agents"][ex_agent]["exchange_rts"].append(ex["rt_minutes"])
-                weeks[week]["agents"][ex_agent]["reply_count"] += 1
+            if ex_agent not in TEAM_AGENTS:
+                continue
+            # Determine the week this reply belongs to (by admin reply timestamp)
+            reply_week = assign_week_label(ex["admin_ts"])
+            if reply_week not in weeks:
+                # Initialize the week entry if it doesn't exist yet
+                weeks[reply_week]["conversations"]  # triggers defaultdict
+            weeks[reply_week]["agents"][ex_agent]["exchange_rts"].append(ex["rt_minutes"])
+            weeks[reply_week]["agents"][ex_agent]["reply_count"] += 1
 
         # Use actual message_count from CSV
         msg_count = convo.get("message_count", "")

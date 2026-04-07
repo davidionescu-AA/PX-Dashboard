@@ -50,7 +50,11 @@ ADMIN_CACHE = {}
 
 
 def fetch_conversations(days_back):
-    """Search Intercom for conversations created in the last N days."""
+    """Search Intercom for conversations updated in the last N days.
+
+    Uses updated_at (not created_at) so we also capture old conversations
+    that received new replies during this period.
+    """
     cutoff = int((datetime.now() - timedelta(days=days_back)).timestamp())
     all_conversations = []
     starting_after = None
@@ -64,7 +68,7 @@ def fetch_conversations(days_back):
             "query": {
                 "operator": "AND",
                 "value": [
-                    {"field": "created_at", "operator": ">", "value": cutoff},
+                    {"field": "updated_at", "operator": ">", "value": cutoff},
                     {"field": "source.author.type", "operator": "=", "value": "user"},
                 ],
             },
